@@ -969,8 +969,20 @@ func behaviour(cell, orb): # enum Behaviour behaviour(Vector3, Orb)
 ## Orb particles
 
 var PARTICLE_OFFSET = AREA_OFFSET + Vector3(0,1.3,0)
-const PARTICLE_SPEED = 8.0 # DEBUG
-#const PARTICLE_SPEED = 3.5 # cells per second
+var PARTICLE_SPEED = 7.0 if _DEBUG_ else 4.0 # cells per second
+
+class ParticlesNode extends Spatial:
+
+	var orb setget ,get_orb
+	func get_orb():
+		return particles.orb if particles else -1
+
+	var particles setget set_particles # ActivableParticles
+	func set_particles(value):
+		if particles:
+			remove_child(particles)
+		particles = value
+		add_child(particles)
 
 var moving_particles = 0
 var node_paths = {} # {Particle : [Vector3]}
@@ -982,17 +994,14 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 	var id = closest_reachable_path_for(Actor.PARTICLE, from, to, orb, true)
 	var path = yield(self, id)
 
-	#if is_lift_up(from) and path.size() >= 2 and path[1].y == from.y:
-	#	# Absorbing a lift with player not on it but on another height
-	#	path = [from] + path
-	#prints("Path %s –> %s:" % [from, to], path)
-	#if path.back() != to:
-	#	path.append(to)
+	var particles = preload("res://particles/ActivableParticles.tscn").instance()
+	particles.name = "particles"
+	particles.season = season; particles.orb = orb
+	particles.translation = PARTICLE_OFFSET
 
-	var node = preload("res://particles/ActivableParticles.tscn").instance()
-	node.name = "particle"
-	node.season = season; node.orb = orb
-	node.translation = from + PARTICLE_OFFSET
+	var node = ParticlesNode.new()
+	node.particles = particles
+	node.translation = from
 	add_child(node)
 	var tween = Tween.new(); tween.name = "tween"
 	node.add_child(tween)
@@ -1007,7 +1016,7 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 			yield(tween, "tween_completed")
 			_move_particle(node, from)
 			yield(tween, "tween_completed")
-			node.emitting = false
+			particles.emitting = false
 			Helper.remove_from_parent(node)
 
 			if end_callback:
@@ -1036,18 +1045,11 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 
 	return true
 
-	# TODO: Offset particles when passing above torches
-	#for position in []+reachable_path:
-	#	var torch = torch_at(position)
-	#	if torch and not is_node_activable_by(torch, orb):
-	#		var index = reachable_path.find(position)
-	#		reachable_path[index] += Vector3(0, 0.5, 0)
-
-func get_particle_next_cell(node, cell, step=1): # Vector3? get_particle_next_cell(Particle, Vector3, int=1)
+func get_particle_next_cell(node, cell, step=1): # Vector3? get_particle_next_cell(ParticlesNode, Vector3, int?)
 	var path = node_paths[node]; assert(path); var index = path.find(cell)
 	return path[index+step] if index != -1 and index+step < path.size() else null
 
-func particle_behaviour(node, orb, cell):
+func particle_behaviour(node, orb, cell): # enum Behaviour particle_behaviour(ParticlesNode, Orb, Vector3)
 	var reversed = reversed_particles.has(node)
 	var next = get_particle_next_cell(node, cell, -1 if reversed else 1)
 	if next == null: # End of path reached
@@ -1077,13 +1079,22 @@ func particle_behaviour(node, orb, cell):
 func _move_particle(node, to):
 	var from = node.translation
 	var tween = node.get_node("tween")
-	tween.interpolate_property(node, "translation", from, to + PARTICLE_OFFSET,
+	tween.interpolate_property(node, "translation", from, to,
 		1.0 / PARTICLE_SPEED, Tween.TRANS_LINEAR, Tween.EASE_IN)
+
+	var from_ofs = PARTICLE_OFFSET; var to_ofs = PARTICLE_OFFSET
+	if is_torch(from) and not can_activate(from, node.orb):
+		from_ofs.y += 0.6
+	elif is_torch(to) and not can_activate(to, node.orb):
+		to_ofs.y += 0.6
+	tween.interpolate_property(node.particles, "translation", from_ofs, to_ofs,
+		1.0 / PARTICLE_SPEED, Tween.TRANS_LINEAR, Tween.EASE_IN)
+
 	tween.start()
 
 var reversed_particles = [] # [Particle]
 func advance_particle(node, end_callback=""):
-	var cell = round3(node.translation - PARTICLE_OFFSET)
+	var cell = round3(node.translation)
 	var behaviour = particle_behaviour(node, node.orb, cell)
 	match behaviour:
 		Behaviour.ABSORBED, Behaviour.REACHED:
@@ -1170,7 +1181,7 @@ func _on_particle_bounced(node, orb, position):
 		emit_signal("player_hurt")
 		camera.shake(1.1, 1.4)
 
-func _on_particle_moved(particle, orb, to_pos, behaviour): # Bounced back to start if behaviour == BOUNCING
+func _on_particle_moved(node, orb, to_pos, behaviour): # Bounced back to start if behaviour == BOUNCING
 	moving_particles -= 1;
 	if moving_particles == 0: all_particles_moved()
 
@@ -1184,12 +1195,13 @@ func _on_particle_moved(particle, orb, to_pos, behaviour): # Bounced back to sta
 		activate(to_pos)
 
 	audio_player.stop(Sound.PARTICLES)
-	particle.emitting = false
+	node.particles.restart() # DEBUG
+	node.particles.emitting = false
 
 	var timer = Timer.new(); add_child(timer)
 	timer.wait_time = 0.5; timer.autostart = true
 	yield(timer, "timeout")
-	Helper.remove_from_parent(particle)
+	Helper.remove_from_parent(node)
 
 func all_particles_moved():
 	particle_already_bouncing = false
