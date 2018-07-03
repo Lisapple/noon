@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/theme-3.wav-a3d417e8ccd9efc162699252078c8c3a.sample"
+
+[deps]
+
+source_file="res://music/spring/theme-3.wav"
+dest_files=[ "res://.import/theme-3.wav-a3d417e8ccd9efc162699252078c8c3a.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=48000.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

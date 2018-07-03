@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/absorb.wav-1462c31db459c7092e050340645c7f1e.sample"
+
+[deps]
+
+source_file="res://sounds/absorb.wav"
+dest_files=[ "res://.import/absorb.wav-1462c31db459c7092e050340645c7f1e.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=44100.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/theme-4.wav-2c1955f941264fb89ca10cd74e11ceb5.sample"
+
+[deps]
+
+source_file="res://music/autumn/theme-4.wav"
+dest_files=[ "res://.import/theme-4.wav-2c1955f941264fb89ca10cd74e11ceb5.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=48000.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

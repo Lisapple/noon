@@ -1,0 +1,50 @@
+[gd_resource type="ShaderMaterial" load_steps=5 format=2]
+
+[ext_resource path="res://textures/wave-ext-mask.svg" type="Texture" id=1]
+[ext_resource path="res://textures/wave-int-mask.svg" type="Texture" id=2]
+[ext_resource path="res://textures/wave.svg" type="Texture" id=3]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type spatial;
+render_mode unshaded;
+
+// 0 for straight, 1 for external angle, 2 for internal
+uniform int type : hint_range(0,2);
+uniform sampler2D tex;
+uniform sampler2D interior_mask;
+uniform sampler2D exterior_mask;
+uniform float alpha = 0.1;
+
+void fragment() {
+	// 90º CW rotation
+	mat2 rot = mat2(vec2(0.0, 1.0), vec2(-1.0, 0.0));
+
+	float offset = pow(sin(TIME * 0.2), 3.0) * 0.4;
+	vec2 scale = vec2(0.9 + sin(TIME) * 0.05, 1.0); // Fix scale to avoid aliasing from texture border
+	vec4 color1 = texture(tex, vec2(0.0, offset) + UV * scale).rrrr;
+	vec4 color2 = texture(tex, vec2(0.0, offset) + UV * rot * scale).rrrr;
+	vec4 OUTPUT = color1;
+	if (type == 1) { // Exterior
+		float mask = texture(exterior_mask, UV).r;
+		OUTPUT = color1 * color2 * mask;
+	} else if (type == 2) { // Interior
+		float mask = texture(interior_mask, UV).r;
+		OUTPUT = smoothstep(0.0, 1.0, color1 + color2 + mask);
+	}
+	OUTPUT.a *= alpha;
+	ALBEDO = OUTPUT.rgb; ALPHA = OUTPUT.a;
+}"
+_sections_unfolded = [ "Resource" ]
+
+[resource]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/type = 0
+shader_param/alpha = 0.4
+shader_param/tex = ExtResource( 3 )
+shader_param/interior_mask = ExtResource( 2 )
+shader_param/exterior_mask = ExtResource( 1 )
+_sections_unfolded = [ "shader_param" ]
+

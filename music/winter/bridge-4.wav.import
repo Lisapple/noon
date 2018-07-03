@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/bridge-4.wav-b84a6c4b5df03580dad34fa0d730950e.sample"
+
+[deps]
+
+source_file="res://music/winter/bridge-4.wav"
+dest_files=[ "res://.import/bridge-4.wav-b84a6c4b5df03580dad34fa0d730950e.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=48000.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

@@ -1,0 +1,495 @@
+[gd_scene load_steps=22 format=2]
+
+
+[sub_resource type="Animation" id=1]
+
+resource_name = "Door-closing"
+length = 1.0
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Door:scale")
+tracks/0/interp = 2
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 0.25 ),
+"update": 0,
+"values": [ Vector3( 1.3, 0.85, 0.4 ), Vector3( 1.3, 6, 0.4 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+
+resource_name = "Hole-filling"
+length = 0.5
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Hole:scale")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.5 ),
+"transitions": PoolRealArray( 1, -4, -4 ),
+"update": 0,
+"values": [ Vector3( 0.01, 0.01, 0.01 ), Vector3( 1, 0.6, 1 ), Vector3( 1, 1.4, 1 ) ]
+}
+
+[sub_resource type="Animation" id=3]
+
+resource_name = "Lift-down"
+length = 1.0
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Lift:translation")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 4, -4 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0, -1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+
+length = 1.0
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Lift:translation")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( -4, 0.25 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+
+length = 1.0
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Lift:translation")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.4, 1 ),
+"transitions": PoolRealArray( -4, 1, -4 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0, -0.3, 0 ), Vector3( 0, 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=6]
+
+length = 5.0
+loop = true
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Orb:translation")
+tracks/0/interp = 2
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0.2, 1.5, 2.5, 3.5, 4.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0.05, 0.05, 0 ), Vector3( 0, 0.15, 0.05 ), Vector3( -0.05, 0.08, 0 ), Vector3( 0, 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=7]
+
+length = 0.5
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Orb:translation")
+tracks/0/interp = 2
+tracks/0/imported = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0, 0.35, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("AnimationPlayer/Orb:scale")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 1, 1, 1 ), Vector3( 1, 1, 1 ), Vector3( 0, 0, 0 ) ]
+}
+
+[sub_resource type="GDScript" id=8]
+
+script/source = "extends \"res://ManyAnimationsPlayer.gd\"
+
+func play(name=\"\", custom_blend=-1, custom_speed=1.0, from_end=false):
+	print(\"%%% Playing \", name)
+	.play(name, custom_blend, custom_speed, from_end)
+
+func is_idle():
+	var idle = .is_idle();
+	print(\"Player is %s\" % \"IDLE\" if idle else \"WORKING\")
+	return idle
+
+func _on_animation_finished():
+	._on_animation_finished()
+	print(\"Player FINISHED\")"
+
+[sub_resource type="SpatialMaterial" id=9]
+
+flags/visible = true
+flags/double_sided = true
+flags/invert_faces = false
+flags/unshaded = false
+flags/on_top = false
+flags/lightmap_on_uv2 = true
+flags/colarray_is_srgb = true
+params/blend_mode = 0
+params/depth_draw = 1
+params/line_width = -1.0842e-19
+fixed_flags/use_alpha = false
+fixed_flags/use_color_array = false
+fixed_flags/use_point_size = false
+fixed_flags/discard_alpha = false
+fixed_flags/use_xy_normalmap = false
+params/diffuse = Color( 0.784314, 0.784314, 0.784314, 1 )
+params/specular = Color( 0, 0, 0, 1 )
+params/emission = Color( 0, 0, 0, 1 )
+params/specular_exp = 80.0
+params/detail_mix = 1.0
+params/normal_depth = 1
+params/shader = 0
+params/shader_param = 0.5
+params/glow = 0
+params/point_size = 1.0
+uv_xform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+textures/diffuse_tc = 0
+textures/detail_tc = 0
+textures/specular_tc = 0
+textures/emission_tc = 0
+textures/specular_exp_tc = 0
+textures/glow_tc = 0
+textures/normal_tc = 0
+textures/shade_param_tc = 0
+
+[sub_resource type="Mesh" id=10]
+
+surfaces/0 = {
+"alphasort": false,
+"arrays": [ PoolVector3Array( 0, 0.184776, 0.0765367, 0.0292893, 0.184776, 0.0707107, 0, 0.2, 0, 0, 0.141421, 0.141421, 0.0541196, 0.141421, 0.130656, 0, 0.0765367, 0.184776, 0.0707107, 0.0765367, 0.170711, 0, -1e-08, 0.2, 0.0765367, -1e-08, 0.184776, 0, -0.0765367, 0.184776, 0.0707107, -0.0765367, 0.170711, 0, -0.141421, 0.141421, 0.0541196, -0.141421, 0.130656, 0, -0.184776, 0.0765367, 0.0292893, -0.184776, 0.0707107, 0, -0.2, 0, 0.0541196, 0.184776, 0.0541196, 0, 0.2, 0, 0.1, 0.141421, 0.1, 0.130656, 0.0765367, 0.130656, 0.141421, -1e-08, 0.141421, 0.130656, -0.0765367, 0.130656, 0.1, -0.141421, 0.1, 0.0541196, -0.184776, 0.0541196, 0, -0.2, 0, 0.0707107, 0.184776, 0.0292893, 0, 0.2, 0, 0.130656, 0.141421, 0.0541196, 0.170711, 0.0765367, 0.0707107, 0.184776, -1e-08, 0.0765367, 0.170711, -0.0765367, 0.0707107, 0.130656, -0.141421, 0.0541196, 0.0707107, -0.184776, 0.0292893, 0, -0.2, 0, 0.0765367, 0.184776, 0, 0, 0.2, 0, 0.141421, 0.141421, -1e-08, 0.184776, 0.0765367, -1e-08, 0.2, -1e-08, -1e-08, 0.184776, -0.0765367, -1e-08, 0.141421, -0.141421, -1e-08, 0.0765367, -0.184776, 0, 0, -0.2, 0, 0.0707107, 0.184776, -0.0292893, 0, 0.2, 0, 0.130656, 0.141421, -0.0541196, 0.170711, 0.0765367, -0.0707107, 0.184776, -1e-08, -0.0765367, 0.170711, -0.0765367, -0.0707107, 0.130656, -0.141421, -0.0541196, 0.0707107, -0.184776, -0.0292893, 0, -0.2, 0, 0.0541196, 0.184776, -0.0541196, 0, 0.2, 0, 0.1, 0.141421, -0.1, 0.130656, 0.0765367, -0.130656, 0.141421, -1e-08, -0.141421, 0.130656, -0.0765367, -0.130656, 0.1, -0.141421, -0.1, 0.0541196, -0.184776, -0.0541196, 0, -0.2, 0, 0.0292893, 0.184776, -0.0707107, 0, 0.2, 0, 0.0541196, 0.141421, -0.130656, 0.0707107, 0.0765367, -0.170711, 0.0765367, -1e-08, -0.184776, 0.0707107, -0.0765367, -0.170711, 0.0541196, -0.141421, -0.130656, 0.0292893, -0.184776, -0.0707107, 0, -0.2, 0, -1e-08, 0.184776, -0.0765367, 0, 0.2, 0, -1e-08, 0.141421, -0.141421, -2e-08, 0.0765367, -0.184776, -2e-08, -1e-08, -0.2, -2e-08, -0.0765367, -0.184776, -1e-08, -0.141421, -0.141421, -1e-08, -0.184776, -0.0765367, 0, -0.2, 0, -0.0292893, 0.184776, -0.0707107, 0, 0.2, 0, -0.0541196, 0.141421, -0.130656, -0.0707107, 0.0765367, -0.170711, -0.0765367, -1e-08, -0.184776, -0.0707107, -0.0765367, -0.170711, -0.0541196, -0.141421, -0.130656, -0.0292893, -0.184776, -0.0707107, 0, -0.2, 0, -0.0541196, 0.184776, -0.0541196, 0, 0.2, 0, -0.1, 0.141421, -0.1, -0.130656, 0.0765367, -0.130656, -0.141421, -1e-08, -0.141421, -0.130656, -0.0765367, -0.130656, -0.1, -0.141421, -0.1, -0.0541196, -0.184776, -0.0541196, 0, -0.2, 0, -0.0707107, 0.184776, -0.0292893, 0, 0.2, 0, -0.130656, 0.141421, -0.0541196, -0.170711, 0.0765367, -0.0707106, -0.184776, -1e-08, -0.0765366, -0.170711, -0.0765367, -0.0707106, -0.130656, -0.141421, -0.0541196, -0.0707107, -0.184776, -0.0292893, 0, -0.2, 0, -0.0765367, 0.184776, 0, 0, 0.2, 0, -0.141421, 0.141421, 0, -0.184776, 0.0765367, 0, -0.2, -1e-08, 0, -0.184776, -0.0765367, 0, -0.141421, -0.141421, 0, -0.0765367, -0.184776, 0, 0, -0.2, 0, -0.0707107, 0.184776, 0.0292893, 0, 0.2, 0, -0.130656, 0.141421, 0.0541196, -0.170711, 0.0765367, 0.0707107, -0.184776, -1e-08, 0.0765367, -0.170711, -0.0765367, 0.0707107, -0.130656, -0.141421, 0.0541196, -0.0707106, -0.184776, 0.0292893, 0, -0.2, 0, -0.0541196, 0.184776, 0.0541196, 0, 0.2, 0, -0.1, 0.141421, 0.1, -0.130656, 0.0765367, 0.130656, -0.141421, -1e-08, 0.141421, -0.130656, -0.0765367, 0.130656, -0.1, -0.141421, 0.1, -0.0541196, -0.184776, 0.0541196, 0, -0.2, 0, -0.0292893, 0.184776, 0.0707107, 0, 0.2, 0, -0.0541196, 0.141421, 0.130656, -0.0707107, 0.0765367, 0.170711, -0.0765367, -1e-08, 0.184776, -0.0707107, -0.0765367, 0.170711, -0.0541196, -0.141421, 0.130656, -0.0292893, -0.184776, 0.0707107, 0, -0.2, 0, 0, 0.184776, 0.0765367, 0, 0.2, 0, 0, 0.141421, 0.141421, 0, 0.0765367, 0.184776, 0, -1e-08, 0.2, 0, -0.0765367, 0.184776, 0, -0.141421, 0.141421, 0, -0.184776, 0.0765367, 0, -0.2, 0 ), PoolVector3Array( 0, 0.903, 0.374, 0.143, 0.903, 0.345, 0, 0.98, 0, 0, 0.687, 0.686, 0.263, 0.687, 0.634, 0, 0.37, 0.891, 0.341, 0.37, 0.824, 0, 0, 0.963, 0.368, 0, 0.889, 0, -0.37, 0.891, 0.341, -0.37, 0.824, 0, -0.687, 0.686, 0.263, -0.687, 0.634, 0, -0.903, 0.374, 0.143, -0.903, 0.345, 0, -0.98, 0, 0.264, 0.903, 0.264, 0, 0.98, 0, 0.485, 0.687, 0.485, 0.63, 0.37, 0.63, 0.681, 0, 0.681, 0.63, -0.37, 0.63, 0.485, -0.687, 0.485, 0.264, -0.903, 0.264, 0, -0.98, 0, 0.345, 0.903, 0.143, 0, 0.98, 0, 0.634, 0.687, 0.263, 0.824, 0.37, 0.341, 0.889, 0, 0.368, 0.824, -0.37, 0.341, 0.634, -0.687, 0.263, 0.345, -0.903, 0.143, 0, -0.98, 0, 0.374, 0.903, 0, 0, 0.98, 0, 0.686, 0.687, 0, 0.891, 0.37, 0, 0.963, 0, 0, 0.891, -0.37, 0, 0.686, -0.687, 0, 0.374, -0.903, 0, 0, -0.98, 0, 0.345, 0.903, -0.143, 0, 0.98, 0, 0.634, 0.687, -0.263, 0.824, 0.37, -0.341, 0.889, 0, -0.368, 0.824, -0.37, -0.341, 0.634, -0.687, -0.263, 0.345, -0.903, -0.143, 0, -0.98, 0, 0.264, 0.903, -0.264, 0, 0.98, 0, 0.485, 0.687, -0.485, 0.63, 0.37, -0.63, 0.681, 0, -0.681, 0.63, -0.37, -0.63, 0.485, -0.687, -0.485, 0.264, -0.903, -0.264, 0, -0.98, 0, 0.143, 0.903, -0.345, 0, 0.98, 0, 0.263, 0.687, -0.634, 0.341, 0.37, -0.824, 0.368, 0, -0.889, 0.341, -0.37, -0.824, 0.263, -0.687, -0.634, 0.143, -0.903, -0.345, 0, -0.98, 0, 0, 0.903, -0.374, 0, 0.98, 0, 0, 0.687, -0.686, 0, 0.37, -0.891, 0, 0, -0.963, 0, -0.37, -0.891, 0, -0.687, -0.686, 0, -0.903, -0.374, 0, -0.98, 0, -0.143, 0.903, -0.345, 0, 0.98, 0, -0.263, 0.687, -0.634, -0.341, 0.37, -0.824, -0.368, 0, -0.889, -0.341, -0.37, -0.824, -0.263, -0.687, -0.634, -0.143, -0.903, -0.345, 0, -0.98, 0, -0.264, 0.903, -0.264, 0, 0.98, 0, -0.485, 0.687, -0.485, -0.63, 0.37, -0.63, -0.681, 0, -0.681, -0.63, -0.37, -0.63, -0.485, -0.687, -0.485, -0.264, -0.903, -0.264, 0, -0.98, 0, -0.345, 0.903, -0.143, 0, 0.98, 0, -0.634, 0.687, -0.263, -0.824, 0.37, -0.341, -0.889, 0, -0.368, -0.824, -0.37, -0.341, -0.634, -0.687, -0.263, -0.345, -0.903, -0.143, 0, -0.98, 0, -0.374, 0.903, 0, 0, 0.98, 0, -0.686, 0.687, 0, -0.891, 0.37, 0, -0.963, 0, 0, -0.891, -0.37, 0, -0.686, -0.687, 0, -0.374, -0.903, 0, 0, -0.98, 0, -0.345, 0.903, 0.143, 0, 0.98, 0, -0.634, 0.687, 0.263, -0.824, 0.37, 0.341, -0.889, 0, 0.368, -0.824, -0.37, 0.341, -0.634, -0.687, 0.263, -0.345, -0.903, 0.143, 0, -0.98, 0, -0.264, 0.903, 0.264, 0, 0.98, 0, -0.485, 0.687, 0.485, -0.63, 0.37, 0.63, -0.681, 0, 0.681, -0.63, -0.37, 0.63, -0.485, -0.687, 0.485, -0.264, -0.903, 0.264, 0, -0.98, 0, -0.143, 0.903, 0.345, 0, 0.98, 0, -0.263, 0.687, 0.634, -0.341, 0.37, 0.824, -0.368, 0, 0.889, -0.341, -0.37, 0.824, -0.263, -0.687, 0.634, -0.143, -0.903, 0.345, 0, -0.98, 0, 0, 0.903, 0.374, 0, 0.98, 0, 0, 0.687, 0.686, 0, 0.37, 0.891, 0, 0, 0.963, 0, -0.37, 0.891, 0, -0.687, 0.686, 0, -0.903, 0.374, 0, -0.98, 0 ), null, null, PoolVector3Array( 0, 0.125, 0, 0.0625, 0.125, 0, 0.0625, 0, 0, 0, 0.25, 0, 0.0625, 0.25, 0, 0, 0.375, 0, 0.0625, 0.375, 0, 0, 0.5, 0, 0.0625, 0.5, 0, 0, 0.625, 0, 0.0625, 0.625, 0, 0, 0.75, 0, 0.0625, 0.75, 0, 0, 0.875, 0, 0.0625, 0.875, 0, 0.0625, 1, 0, 0.125, 0.125, 0, 0.125, 0, 0, 0.125, 0.25, 0, 0.125, 0.375, 0, 0.125, 0.5, 0, 0.125, 0.625, 0, 0.125, 0.75, 0, 0.125, 0.875, 0, 0.125, 1, 0, 0.1875, 0.125, 0, 0.1875, 0, 0, 0.1875, 0.25, 0, 0.1875, 0.375, 0, 0.1875, 0.5, 0, 0.1875, 0.625, 0, 0.1875, 0.75, 0, 0.1875, 0.875, 0, 0.1875, 1, 0, 0.25, 0.125, 0, 0.25, 0, 0, 0.25, 0.25, 0, 0.25, 0.375, 0, 0.25, 0.5, 0, 0.25, 0.625, 0, 0.25, 0.75, 0, 0.25, 0.875, 0, 0.25, 1, 0, 0.3125, 0.125, 0, 0.3125, 0, 0, 0.3125, 0.25, 0, 0.3125, 0.375, 0, 0.3125, 0.5, 0, 0.3125, 0.625, 0, 0.3125, 0.75, 0, 0.3125, 0.875, 0, 0.3125, 1, 0, 0.375, 0.125, 0, 0.375, 0, 0, 0.375, 0.25, 0, 0.375, 0.375, 0, 0.375, 0.5, 0, 0.375, 0.625, 0, 0.375, 0.75, 0, 0.375, 0.875, 0, 0.375, 1, 0, 0.4375, 0.125, 0, 0.4375, 0, 0, 0.4375, 0.25, 0, 0.4375, 0.375, 0, 0.4375, 0.5, 0, 0.4375, 0.625, 0, 0.4375, 0.75, 0, 0.4375, 0.875, 0, 0.4375, 1, 0, 0.5, 0.125, 0, 0.5, 0, 0, 0.5, 0.25, 0, 0.5, 0.375, 0, 0.5, 0.5, 0, 0.5, 0.625, 0, 0.5, 0.75, 0, 0.5, 0.875, 0, 0.5, 1, 0, 0.5625, 0.125, 0, 0.5625, 0, 0, 0.5625, 0.25, 0, 0.5625, 0.375, 0, 0.5625, 0.5, 0, 0.5625, 0.625, 0, 0.5625, 0.75, 0, 0.5625, 0.875, 0, 0.5625, 1, 0, 0.625, 0.125, 0, 0.625, 0, 0, 0.625, 0.25, 0, 0.625, 0.375, 0, 0.625, 0.5, 0, 0.625, 0.625, 0, 0.625, 0.75, 0, 0.625, 0.875, 0, 0.625, 1, 0, 0.6875, 0.125, 0, 0.6875, 0, 0, 0.6875, 0.25, 0, 0.6875, 0.375, 0, 0.6875, 0.5, 0, 0.6875, 0.625, 0, 0.6875, 0.75, 0, 0.6875, 0.875, 0, 0.6875, 1, 0, 0.75, 0.125, 0, 0.75, 0, 0, 0.75, 0.25, 0, 0.75, 0.375, 0, 0.75, 0.5, 0, 0.75, 0.625, 0, 0.75, 0.75, 0, 0.75, 0.875, 0, 0.75, 1, 0, 0.8125, 0.125, 0, 0.8125, 0, 0, 0.8125, 0.25, 0, 0.8125, 0.375, 0, 0.8125, 0.5, 0, 0.8125, 0.625, 0, 0.8125, 0.75, 0, 0.8125, 0.875, 0, 0.8125, 1, 0, 0.875, 0.125, 0, 0.875, 0, 0, 0.875, 0.25, 0, 0.875, 0.375, 0, 0.875, 0.5, 0, 0.875, 0.625, 0, 0.875, 0.75, 0, 0.875, 0.875, 0, 0.875, 1, 0, 0.9375, 0.125, 0, 0.9375, 0, 0, 0.9375, 0.25, 0, 0.9375, 0.375, 0, 0.9375, 0.5, 0, 0.9375, 0.625, 0, 0.9375, 0.75, 0, 0.9375, 0.875, 0, 0.9375, 1, 0, 1, 0.125, 0, 1, 0, 0, 1, 0.25, 0, 1, 0.375, 0, 1, 0.5, 0, 1, 0.625, 0, 1, 0.75, 0, 1, 0.875, 0, 1, 1, 0 ), PoolVector3Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ), null, null, PoolIntArray( 0, 2, 1, 0, 4, 3, 0, 1, 4, 3, 6, 5, 3, 4, 6, 5, 8, 7, 5, 6, 8, 7, 10, 9, 7, 8, 10, 9, 12, 11, 9, 10, 12, 11, 14, 13, 11, 12, 14, 13, 14, 15, 1, 17, 16, 1, 18, 4, 1, 16, 18, 4, 19, 6, 4, 18, 19, 6, 20, 8, 6, 19, 20, 8, 21, 10, 8, 20, 21, 10, 22, 12, 10, 21, 22, 12, 23, 14, 12, 22, 23, 14, 23, 24, 16, 26, 25, 16, 27, 18, 16, 25, 27, 18, 28, 19, 18, 27, 28, 19, 29, 20, 19, 28, 29, 20, 30, 21, 20, 29, 30, 21, 31, 22, 21, 30, 31, 22, 32, 23, 22, 31, 32, 23, 32, 33, 25, 35, 34, 25, 36, 27, 25, 34, 36, 27, 37, 28, 27, 36, 37, 28, 38, 29, 28, 37, 38, 29, 39, 30, 29, 38, 39, 30, 40, 31, 30, 39, 40, 31, 41, 32, 31, 40, 41, 32, 41, 42, 34, 44, 43, 34, 45, 36, 34, 43, 45, 36, 46, 37, 36, 45, 46, 37, 47, 38, 37, 46, 47, 38, 48, 39, 38, 47, 48, 39, 49, 40, 39, 48, 49, 40, 50, 41, 40, 49, 50, 41, 50, 51, 43, 53, 52, 43, 54, 45, 43, 52, 54, 45, 55, 46, 45, 54, 55, 46, 56, 47, 46, 55, 56, 47, 57, 48, 47, 56, 57, 48, 58, 49, 48, 57, 58, 49, 59, 50, 49, 58, 59, 50, 59, 60, 52, 62, 61, 52, 63, 54, 52, 61, 63, 54, 64, 55, 54, 63, 64, 55, 65, 56, 55, 64, 65, 56, 66, 57, 56, 65, 66, 57, 67, 58, 57, 66, 67, 58, 68, 59, 58, 67, 68, 59, 68, 69, 61, 71, 70, 61, 72, 63, 61, 70, 72, 63, 73, 64, 63, 72, 73, 64, 74, 65, 64, 73, 74, 65, 75, 66, 65, 74, 75, 66, 76, 67, 66, 75, 76, 67, 77, 68, 67, 76, 77, 68, 77, 78, 70, 80, 79, 70, 81, 72, 70, 79, 81, 72, 82, 73, 72, 81, 82, 73, 83, 74, 73, 82, 83, 74, 84, 75, 74, 83, 84, 75, 85, 76, 75, 84, 85, 76, 86, 77, 76, 85, 86, 77, 86, 87, 79, 89, 88, 79, 90, 81, 79, 88, 90, 81, 91, 82, 81, 90, 91, 82, 92, 83, 82, 91, 92, 83, 93, 84, 83, 92, 93, 84, 94, 85, 84, 93, 94, 85, 95, 86, 85, 94, 95, 86, 95, 96, 88, 98, 97, 88, 99, 90, 88, 97, 99, 90, 100, 91, 90, 99, 100, 91, 101, 92, 91, 100, 101, 92, 102, 93, 92, 101, 102, 93, 103, 94, 93, 102, 103, 94, 104, 95, 94, 103, 104, 95, 104, 105, 97, 107, 106, 97, 108, 99, 97, 106, 108, 99, 109, 100, 99, 108, 109, 100, 110, 101, 100, 109, 110, 101, 111, 102, 101, 110, 111, 102, 112, 103, 102, 111, 112, 103, 113, 104, 103, 112, 113, 104, 113, 114, 106, 116, 115, 106, 117, 108, 106, 115, 117, 108, 118, 109, 108, 117, 118, 109, 119, 110, 109, 118, 119, 110, 120, 111, 110, 119, 120, 111, 121, 112, 111, 120, 121, 112, 122, 113, 112, 121, 122, 113, 122, 123, 115, 125, 124, 115, 126, 117, 115, 124, 126, 117, 127, 118, 117, 126, 127, 118, 128, 119, 118, 127, 128, 119, 129, 120, 119, 128, 129, 120, 130, 121, 120, 129, 130, 121, 131, 122, 121, 130, 131, 122, 131, 132, 124, 134, 133, 124, 135, 126, 124, 133, 135, 126, 136, 127, 126, 135, 136, 127, 137, 128, 127, 136, 137, 128, 138, 129, 128, 137, 138, 129, 139, 130, 129, 138, 139, 130, 140, 131, 130, 139, 140, 131, 140, 141, 133, 143, 142, 133, 144, 135, 133, 142, 144, 135, 145, 136, 135, 144, 145, 136, 146, 137, 136, 145, 146, 137, 147, 138, 137, 146, 147, 138, 148, 139, 138, 147, 148, 139, 149, 140, 139, 148, 149, 140, 149, 150 ) ],
+"material": SubResource( 9 ),
+"morph_arrays": [  ],
+"name": "Material.4.2",
+"primitive": 4
+}
+custom_aabb/custom_aabb = Rect3( 0, 0, 0, 0, 0, 0 )
+
+[sub_resource type="SpatialMaterial" id=11]
+
+flags/visible = true
+flags/double_sided = true
+flags/invert_faces = false
+flags/unshaded = false
+flags/on_top = false
+flags/lightmap_on_uv2 = true
+flags/colarray_is_srgb = true
+params/blend_mode = 0
+params/depth_draw = 1
+params/line_width = -1.0842e-19
+fixed_flags/use_alpha = false
+fixed_flags/use_color_array = false
+fixed_flags/use_point_size = false
+fixed_flags/discard_alpha = false
+fixed_flags/use_xy_normalmap = false
+params/diffuse = Color( 0.784314, 0.784314, 0.784314, 1 )
+params/specular = Color( 0, 0, 0, 1 )
+params/emission = Color( 0, 0, 0, 1 )
+params/specular_exp = 80.0
+params/detail_mix = 1.0
+params/normal_depth = 1
+params/shader = 0
+params/shader_param = 0.5
+params/glow = 0
+params/point_size = 1.0
+uv_xform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+textures/diffuse_tc = 0
+textures/detail_tc = 0
+textures/specular_tc = 0
+textures/emission_tc = 0
+textures/specular_exp_tc = 0
+textures/glow_tc = 0
+textures/normal_tc = 0
+textures/shade_param_tc = 0
+
+[sub_resource type="Mesh" id=12]
+
+surfaces/0 = {
+"alphasort": false,
+"arrays": [ PoolVector3Array( 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5 ), PoolVector3Array( 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0 ), null, null, PoolVector3Array( 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0 ), PoolVector3Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ), null, null, PoolIntArray( 0, 2, 1, 0, 3, 2, 4, 6, 5, 4, 7, 6, 8, 10, 9, 8, 11, 10, 12, 14, 13, 12, 15, 14, 16, 18, 17, 16, 19, 18, 20, 22, 21, 20, 23, 22 ) ],
+"material": SubResource( 11 ),
+"morph_arrays": [  ],
+"name": "Material.4",
+"primitive": 4
+}
+custom_aabb/custom_aabb = Rect3( 0, 0, 0, 0, 0, 0 )
+
+[sub_resource type="SpatialMaterial" id=13]
+
+flags/visible = true
+flags/double_sided = false
+flags/invert_faces = false
+flags/unshaded = false
+flags/on_top = false
+flags/lightmap_on_uv2 = true
+flags/colarray_is_srgb = true
+params/blend_mode = 0
+params/depth_draw = 1
+params/line_width = 0.0
+fixed_flags/use_alpha = true
+fixed_flags/use_color_array = false
+fixed_flags/use_point_size = false
+fixed_flags/discard_alpha = true
+fixed_flags/use_xy_normalmap = false
+params/diffuse = Color( 1, 1, 1, 1 )
+params/specular = Color( 0, 0, 0, 1 )
+params/emission = Color( 0, 0, 0, 1 )
+params/specular_exp = 80.0
+params/detail_mix = 1.0
+params/normal_depth = 1
+params/shader = 0
+params/shader_param = 0.5
+params/glow = 0
+params/point_size = 1.0
+uv_xform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+textures/diffuse_tc = 0
+textures/detail_tc = 0
+textures/specular_tc = 0
+textures/emission_tc = 0
+textures/specular_exp_tc = 0
+textures/glow_tc = 0
+textures/normal_tc = 0
+textures/shade_param_tc = 0
+
+[sub_resource type="Mesh" id=14]
+
+surfaces/0 = {
+"alphasort": false,
+"arrays": [ PoolVector3Array( 0.5, -0.35, 0.5, 0.5, 0.35, 0.5, -0.5, 0.35, 0.5, -0.5, -0.35, 0.5, -0.5, -0.35, -0.5, -0.5, 0.35, -0.5, 0.5, 0.35, -0.5, 0.5, -0.35, -0.5, -0.5, -0.35, 0.5, -0.5, 0.35, 0.5, -0.5, 0.35, -0.5, -0.5, -0.35, -0.5, 0.5, -0.35, -0.5, 0.5, 0.35, -0.5, 0.5, 0.35, 0.5, 0.5, -0.35, 0.5, 0.5, 0.35, 0.5, 0.5, 0.35, -0.5, -0.5, 0.35, -0.5, -0.5, 0.35, 0.5, 0.5, -0.35, -0.5, 0.5, -0.35, 0.5, -0.5, -0.35, 0.5, -0.5, -0.35, -0.5 ), PoolVector3Array( 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0 ), null, null, PoolVector3Array( 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0 ), PoolVector3Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ), null, null, PoolIntArray( 0, 2, 1, 0, 3, 2, 4, 6, 5, 4, 7, 6, 8, 10, 9, 8, 11, 10, 12, 14, 13, 12, 15, 14, 16, 18, 17, 16, 19, 18, 20, 22, 21, 20, 23, 22 ) ],
+"material": SubResource( 13 ),
+"morph_arrays": [  ],
+"name": "Material.4.2",
+"primitive": 4
+}
+custom_aabb/custom_aabb = Rect3( 0, 0, 0, 0, 0, 0 )
+
+[sub_resource type="SpatialMaterial" id=15]
+
+flags/visible = true
+flags/double_sided = false
+flags/invert_faces = false
+flags/unshaded = false
+flags/on_top = false
+flags/lightmap_on_uv2 = true
+flags/colarray_is_srgb = true
+params/blend_mode = 0
+params/depth_draw = 1
+params/line_width = 4.57524e-41
+fixed_flags/use_alpha = false
+fixed_flags/use_color_array = false
+fixed_flags/use_point_size = false
+fixed_flags/discard_alpha = false
+fixed_flags/use_xy_normalmap = false
+params/diffuse = Color( 0.784314, 0.784314, 0.784314, 1 )
+params/specular = Color( 0, 0, 0, 1 )
+params/emission = Color( 0, 0, 0, 1 )
+params/specular_exp = 80.0
+params/detail_mix = 1.0
+params/normal_depth = 1
+params/shader = 0
+params/shader_param = 0.5
+params/glow = 0
+params/point_size = 1.0
+uv_xform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+textures/diffuse_tc = 0
+textures/detail_tc = 0
+textures/specular_tc = 0
+textures/emission_tc = 0
+textures/specular_exp_tc = 0
+textures/glow_tc = 0
+textures/normal_tc = 0
+textures/shade_param_tc = 0
+
+[sub_resource type="SpatialMaterial" id=16]
+
+flags/visible = true
+flags/double_sided = false
+flags/invert_faces = false
+flags/unshaded = false
+flags/on_top = false
+flags/lightmap_on_uv2 = true
+flags/colarray_is_srgb = true
+params/blend_mode = 0
+params/depth_draw = 1
+params/line_width = 1.59748e-43
+fixed_flags/use_alpha = false
+fixed_flags/use_color_array = false
+fixed_flags/use_point_size = false
+fixed_flags/discard_alpha = false
+fixed_flags/use_xy_normalmap = false
+params/diffuse = Color( 0.784314, 0.784314, 0.784314, 1 )
+params/specular = Color( 0, 0, 0, 1 )
+params/emission = Color( 0, 0, 0, 1 )
+params/specular_exp = 40
+params/detail_mix = 1.0
+params/normal_depth = 1
+params/shader = 0
+params/shader_param = 0.5
+params/glow = 0
+params/point_size = 1.0
+uv_xform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+textures/diffuse_tc = 0
+textures/detail_tc = 0
+textures/specular_tc = 0
+textures/emission_tc = 0
+textures/specular_exp_tc = 0
+textures/glow_tc = 0
+textures/normal_tc = 0
+textures/shade_param_tc = 0
+
+[sub_resource type="Mesh" id=17]
+
+surfaces/0 = {
+"alphasort": false,
+"arrays": [ PoolVector3Array( 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5 ), PoolVector3Array( 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -0.999, 0, 0, -0.999, 0, 0, -0.999, 0, 0, -0.999, -0.999, 0, 0, -0.999, 0, 0, -0.999, 0, 0, -0.999, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -0.999, 0, 0, -0.999, 0, 0, -0.999, 0, 0, -0.999, 0 ), null, null, PoolVector3Array( 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0 ), PoolVector3Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ), null, null, PoolIntArray( 0, 2, 1, 0, 3, 2, 4, 6, 5, 4, 7, 6, 8, 10, 9, 8, 11, 10, 12, 14, 13, 12, 15, 14, 16, 18, 17, 16, 19, 18, 20, 22, 21, 20, 23, 22 ) ],
+"material": SubResource( 15 ),
+"morph_arrays": [  ],
+"name": "Material.4",
+"primitive": 4
+}
+surfaces/1 = {
+"alphasort": false,
+"arrays": [ PoolVector3Array( 0.5, 0.51, 0.5, -0.5, 0.51, 0.5, 0.5, 0.51, -0.5, -0.5, 0.51, -0.5, 0.5, 0.51, -0.5, -0.5, 0.51, 0.5 ), PoolVector3Array( 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0 ), null, null, PoolVector2Array( 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1 ), null, null, null, null ],
+"material": SubResource( 16 ),
+"morph_arrays": [  ],
+"name": "spot-surface",
+"primitive": 4
+}
+custom_aabb/custom_aabb = Rect3( 0, 0, 0, 0, 0, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer"]
+
+playback_process_mode = 1
+playback_default_blend_time = 0.0
+root_node = NodePath("..")
+anims/Door-closing = SubResource( 1 )
+anims/Hole-filling = SubResource( 2 )
+anims/Lift-down = SubResource( 3 )
+anims/Lift-up = SubResource( 4 )
+anims/Lift-up-absorbed = SubResource( 5 )
+anims/Orb-floating = SubResource( 6 )
+anims/Orb-taking = SubResource( 7 )
+playback/active = true
+playback/speed = 1.0
+blend_times = [  ]
+autoplay = ""
+script = SubResource( 8 )
+
+[node name="Orb" type="MeshInstance" parent="."]
+
+_import_path = NodePath("Orb_G")
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.7, 6 )
+transform = Transform( 0.666667, 0, 0, 0, 0.666667, 0, 0, 0, 0.666667, 0, 1.5, 0 )
+layers = 1
+geometry/visible = true
+material_override = null
+cast_shadow = 1
+geometry/receive_shadows = true
+geometry/range_begin = 0.0
+geometry/range_end = 0.0
+extra_cull_margin = 0.0
+use_as_billboard = false
+use_as_y_billboard = false
+use_depth_scale = false
+visible_in_all_rooms = false
+use_in_baked_light = true
+geometry/baked_light_tex_id = 0
+mesh = SubResource( 10 )
+skeleton = NodePath("..")
+material/0 = null
+
+[node name="Door" type="MeshInstance" parent="."]
+
+_import_path = NodePath("Doors/Door_B")
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 6 )
+transform = Transform( 1.3, 0, 0, 0, 0.85, 0, 0, 0, 0.4, 2, 0, 0 )
+layers = 1
+geometry/visible = true
+material_override = null
+cast_shadow = 1
+geometry/receive_shadows = true
+geometry/range_begin = 0.0
+geometry/range_end = 0.0
+extra_cull_margin = 0.0
+use_as_billboard = false
+use_as_y_billboard = false
+use_depth_scale = false
+visible_in_all_rooms = false
+use_in_baked_light = true
+geometry/baked_light_tex_id = 0
+mesh = SubResource( 12 )
+skeleton = NodePath("..")
+material/0 = null
+
+[node name="Hole" type="MeshInstance" parent="."]
+
+_import_path = NodePath("Holes/Hole_G")
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 5 )
+transform = Transform( 1, 0, 0, 0, 1.4, 0, 0, 0, 1, 4, 0, 0 )
+layers = 1
+geometry/visible = true
+material_override = null
+cast_shadow = 1
+geometry/receive_shadows = true
+geometry/range_begin = 0.0
+geometry/range_end = 0.0
+extra_cull_margin = 0.0
+use_as_billboard = false
+use_as_y_billboard = false
+use_depth_scale = false
+visible_in_all_rooms = false
+use_in_baked_light = true
+geometry/baked_light_tex_id = 0
+mesh = SubResource( 14 )
+skeleton = NodePath("..")
+material/0 = null
+
+[node name="Lift" type="MeshInstance" parent="."]
+
+_import_path = NodePath("Lifts/Lift_B")
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 10 )
+layers = 1
+geometry/visible = true
+material_override = null
+cast_shadow = 1
+geometry/receive_shadows = true
+geometry/range_begin = 0.0
+geometry/range_end = 0.0
+extra_cull_margin = 0.0
+use_as_billboard = false
+use_as_y_billboard = false
+use_depth_scale = false
+visible_in_all_rooms = false
+use_in_baked_light = true
+geometry/baked_light_tex_id = 0
+mesh = SubResource( 17 )
+skeleton = NodePath("..")
+material/0 = null
+material/1 = null

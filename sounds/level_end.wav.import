@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/level_end.wav-1300940244aadc074b79ce56fc949470.sample"
+
+[deps]
+
+source_file="res://sounds/level_end.wav"
+dest_files=[ "res://.import/level_end.wav-1300940244aadc074b79ce56fc949470.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=44100.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

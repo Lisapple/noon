@@ -1,0 +1,16 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+
+[deps]
+
+files=[ "res://data/quotes.en.translation", "res://data/quotes.fr.translation" ]
+
+source_file="res://data/quotes.csv"
+dest_files=[ "res://data/quotes.en.translation", "res://data/quotes.fr.translation" ]
+
+[params]
+
+compress=false
+delimiter=1

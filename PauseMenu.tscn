@@ -1,0 +1,347 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://Theme.tres" type="Theme" id=1]
+[ext_resource path="res://PauseMenu.gd" type="Script" id=2]
+[ext_resource path="res://fonts/plume.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://textures/pause-menu/sounds-muted.png" type="Texture" id=4]
+[ext_resource path="res://textures/pause-menu/sounds-unmuted.png" type="Texture" id=5]
+[ext_resource path="res://textures/pause-menu/music-muted.png" type="Texture" id=6]
+[ext_resource path="res://textures/pause-menu/music-unmuted.png" type="Texture" id=7]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform float desaturate = 0.6;
+uniform float brightness = 0.8;
+uniform float blur = 3.4;
+
+void fragment() {
+	vec3 color = textureLod(SCREEN_TEXTURE, SCREEN_UV, blur).rgb;
+	float grayscale = length(color * vec3(0.299, 0.587, 0.114));
+	color += desaturate * (vec3(grayscale) - color);
+	COLOR = vec4(color * brightness, 1);
+	COLOR.rgb -= vec3(0.08);
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/desaturate = 0.6
+shader_param/brightness = 0.8
+shader_param/blur = 3.4
+_sections_unfolded = [ "shader_param" ]
+
+[sub_resource type="DynamicFont" id=3]
+
+size = 42
+use_mipmaps = false
+use_filter = false
+font_data = ExtResource( 3 )
+_sections_unfolded = [ "Settings" ]
+
+[sub_resource type="DynamicFont" id=4]
+
+size = 24
+use_mipmaps = false
+use_filter = false
+font_data = ExtResource( 3 )
+_sections_unfolded = [ "Settings" ]
+
+[sub_resource type="Animation" id=5]
+
+length = 0.6
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("Resume:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ true, true, false ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Resume:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("ConfirmationTitle:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ false, true, true ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("ConfirmationTitle:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[node name="PauseMenu" type="Panel" index="0"]
+
+material = SubResource( 2 )
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+theme = ExtResource( 1 )
+script = ExtResource( 2 )
+_sections_unfolded = [ "Material", "Theme" ]
+
+[node name="Resume" type="Button" parent="." index="0"]
+
+modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+margin_left = 20.0
+margin_top = -200.0
+margin_right = 143.0
+margin_bottom = -120.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+toggle_mode = false
+enabled_focus_mode = 0
+shortcut = null
+group = null
+text = "resume"
+flat = false
+align = 0
+_sections_unfolded = [ "Rect", "Theme", "Visibility" ]
+
+[node name="Restart" type="Button" parent="Resume" index="0"]
+
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+margin_top = 19.0
+margin_right = 136.0
+margin_bottom = 99.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+custom_colors/font_color = Color( 0.862745, 0.141176, 0.141176, 1 )
+custom_colors/font_color_hover = Color( 0.858824, 0.137255, 0.137255, 1 )
+custom_colors/font_color_pressed = Color( 0.858824, 0.137255, 0.137255, 1 )
+toggle_mode = false
+enabled_focus_mode = 0
+shortcut = null
+group = null
+text = "restart..."
+flat = false
+align = 0
+_sections_unfolded = [ "Rect", "Theme" ]
+
+[node name="ConfirmationTitle" type="Label" parent="." index="1"]
+
+modulate = Color( 1, 1, 1, 0.333333 )
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+margin_left = 24.0
+margin_top = -294.0
+margin_right = 550.0
+margin_bottom = -228.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 0
+custom_fonts/font = SubResource( 3 )
+text = "restart?"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+_sections_unfolded = [ "custom_fonts" ]
+
+[node name="Subtitle" type="Label" parent="ConfirmationTitle" index="0"]
+
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+margin_left = 2.0
+margin_top = -15.0
+margin_right = 806.0
+margin_bottom = 51.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 0
+custom_fonts/font = SubResource( 4 )
+text = "all progression will be erased, would you still like to restart?"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+_sections_unfolded = [ "custom_fonts" ]
+
+[node name="OK" type="Button" parent="ConfirmationTitle" index="1"]
+
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+margin_top = 28.0
+margin_right = 112.0
+margin_bottom = 108.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+custom_colors/font_color = Color( 0.862745, 0.141176, 0.141176, 1 )
+custom_colors/font_color_hover = Color( 0.858824, 0.137255, 0.137255, 1 )
+custom_colors/font_color_pressed = Color( 0.858824, 0.137255, 0.137255, 1 )
+toggle_mode = false
+enabled_focus_mode = 0
+shortcut = null
+group = null
+text = "restart"
+flat = false
+align = 0
+_sections_unfolded = [ "Rect", "Theme" ]
+
+[node name="Cancel" type="Button" parent="ConfirmationTitle" index="2"]
+
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 127.0
+margin_right = 102.0
+margin_bottom = 207.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+toggle_mode = false
+enabled_focus_mode = 0
+shortcut = null
+group = null
+text = "cancel"
+flat = false
+align = 0
+_sections_unfolded = [ "Rect", "Theme" ]
+
+[node name="MuteSounds" type="TextureButton" parent="." index="2"]
+
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+margin_left = -79.0
+margin_top = 20.0
+margin_right = -19.0
+margin_bottom = 80.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+toggle_mode = true
+pressed = true
+enabled_focus_mode = 2
+shortcut = null
+group = null
+texture_normal = ExtResource( 4 )
+texture_pressed = ExtResource( 5 )
+_sections_unfolded = [ "Rect", "Textures" ]
+
+[node name="MuteMusic" type="TextureButton" parent="." index="3"]
+
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+margin_left = -79.0
+margin_top = 94.0
+margin_right = -20.0
+margin_bottom = 153.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+toggle_mode = true
+pressed = true
+enabled_focus_mode = 2
+shortcut = null
+group = null
+texture_normal = ExtResource( 6 )
+texture_pressed = ExtResource( 7 )
+_sections_unfolded = [ "Rect", "Textures" ]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="4"]
+
+pause_mode = 2
+root_node = NodePath("..")
+autoplay = ""
+playback_process_mode = 1
+playback_default_blend_time = 0.0
+playback_speed = 1.0
+anims/show-confirmation = SubResource( 5 )
+blend_times = [  ]
+
+[node name="Tween" type="Tween" parent="." index="5"]
+
+repeat = false
+playback_process_mode = 1
+playback_speed = 1.0
+playback/active = false
+playback/repeat = false
+playback/speed = 1.0
+
+

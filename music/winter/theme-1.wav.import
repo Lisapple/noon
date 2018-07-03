@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/theme-1.wav-aed2da1e99d3871627af07665ce21307.sample"
+
+[deps]
+
+source_file="res://music/winter/theme-1.wav"
+dest_files=[ "res://.import/theme-1.wav-aed2da1e99d3871627af07665ce21307.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=48000.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

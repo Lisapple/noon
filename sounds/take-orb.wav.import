@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/take-orb.wav-92d4b61ffd0ee5d760ddd1f2c63167f1.sample"
+
+[deps]
+
+source_file="res://sounds/take-orb.wav"
+dest_files=[ "res://.import/take-orb.wav-92d4b61ffd0ee5d760ddd1f2c63167f1.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=44100.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

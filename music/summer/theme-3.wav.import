@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/theme-3.wav-daf9a5021c15cb77802bc5e39c598423.sample"
+
+[deps]
+
+source_file="res://music/summer/theme-3.wav"
+dest_files=[ "res://.import/theme-3.wav-daf9a5021c15cb77802bc5e39c598423.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=48000.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1

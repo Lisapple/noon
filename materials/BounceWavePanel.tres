@@ -1,0 +1,33 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=2]
+
+[ext_resource path="res://textures/bounce-wave.png" type="Texture" id=1]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform sampler2D mask;
+uniform vec2 center = vec2(0.5, 0.5);
+uniform float radius = 0.3;
+uniform float thickness = 0.08;
+uniform float alpha = 1;
+
+void fragment() {
+	vec2 ratio = vec2(SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x, 1.0);
+	float r = radius;
+	vec2 offset = center * ratio / r - 0.5;
+	vec2 displacement = textureLod(mask, UV / r * ratio - offset, 2.0).rg;
+	COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + displacement * 0.02 * alpha);
+}"
+
+[resource]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/center = Vector2( 0.5, 0.5 )
+shader_param/radius = 0.5
+shader_param/thickness = null
+shader_param/alpha = 1.0
+shader_param/mask = ExtResource( 1 )
+_sections_unfolded = [ "shader_param" ]
+

@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/bridge-2.wav-a271c8dd8766966c06cbaa5b61159730.sample"
+
+[deps]
+
+source_file="res://music/summer/bridge-2.wav"
+dest_files=[ "res://.import/bridge-2.wav-a271c8dd8766966c06cbaa5b61159730.sample" ]
+
+[params]
+
+force/8_bit=true
+force/mono=false
+force/max_rate=true
+force/max_rate_hz=48000.0
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=1
