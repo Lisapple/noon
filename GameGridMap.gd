@@ -795,13 +795,14 @@ func glide(node, from, to, speed=PLAYER_SPEED*2): # speed in cells per seconds
 	for i in path.size()-2:
 		var current = path[i]; if is_lift(current): current.y = get_lift_bottom(current).y + 1
 		var next = path[i+1]; if is_lift(next): next.y = get_lift_bottom(next).y + 1
-		# TODO: Rotate `node` depending of angle
-		var angle = shortest(atan2(next.x-current.x, next.z-current.z) - PI/2)
 		tween.interpolate_property(node, "translation",
 			current + PLAYER_OFFSET, next + PLAYER_OFFSET, 1.0/speed,
 			Tween.TRANS_LINEAR, Tween.EASE_IN)
+
+		var angle = atan2(next.x-current.x, next.z-current.z) - PI/2
+		var to_angle = node.rotation; to_angle.y += shortest(angle - node.rotation.y)
 		tween.interpolate_property(node, "rotation",
-			node.rotation, Vector3(0, angle, 0), 1.0/speed,
+			node.rotation, to_angle, 1.0/speed,
 			Tween.TRANS_LINEAR, Tween.EASE_IN)
 		yield(tween, "tween_completed")
 		yield(tween, "tween_completed")
