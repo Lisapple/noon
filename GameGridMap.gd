@@ -838,10 +838,37 @@ func _on_level_finished(cell):
 
 var ray_origin
 var ray_target
-func _input(event):
+func _unhandled_input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == BUTTON_LEFT:
 		ray_origin = camera.project_ray_origin(event.position)
 		ray_target = ray_origin + camera.project_ray_normal(event.position) * 1_000
+
+func _physics_process(delta):
+	if ray_origin != null and ray_target != null:
+
+		var space_state = PhysicsServer.space_get_direct_state(get_world().get_space())
+		var hit = space_state.intersect_ray(ray_origin, ray_target)
+		# Get selected spot
+		if not hit.empty() and hit.collider.is_ray_pickable():
+			var to = hit.collider.global_transform.origin - AREA_OFFSET
+			to.y -= int(is_lift_up(to))
+			move_player(to)
+		else: # If no spot selected
+			# Find the closest to click
+			var closest_spot; var min_distance = INF
+			for spot in get_spots():
+				var distance = spot.distance_to(ray_origin)
+				if distance < min_distance:
+					closest_spot = spot
+					min_distance = distance
+			# Move the boy on closer spot to him on path to `closest_spot`
+			assert(closest_spot != null)
+			var path = path_for(Actor.PLAYER, get_player_cell(), closest_spot)
+			for cell in path:
+				if get_spots().has(cell):
+					move_player(cell); break
+
+		ray_origin = null; ray_target = null
 
 func _unhandled_key_input(event):
 	if not event.pressed: return
@@ -850,18 +877,6 @@ func _unhandled_key_input(event):
 			toggle_pause()
 		KEY_SPACE: # DEBUG
 			if _DEBUG_: reload_spots()
-
-func _physics_process(delta):
-	if ray_origin != null and ray_target != null: # Get selected node
-
-		var space_state = PhysicsServer.space_get_direct_state(get_world().get_space())
-		var hit = space_state.intersect_ray(ray_origin, ray_target)
-		ray_origin = null; ray_target = null
-
-		if not hit.empty() and hit.collider.is_ray_pickable():
-			var to = hit.collider.global_transform.origin - AREA_OFFSET
-			to.y -= int(is_lift_up(to))
-			move_player(to)
 
 func check_orb_nearby():
 	var pos = get_player_pos()
