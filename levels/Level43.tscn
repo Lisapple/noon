@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://models/ImportedMeshLib_2.meshlib" type="MeshLibrary" id=1]
+[ext_resource path="res://models/ImportedMeshLib.meshlib" type="MeshLibrary" id=1]
 [ext_resource path="res://GameGridMap.gd" type="Script" id=2]
 
 [node name="GridMap" type="GridMap" index="0"]

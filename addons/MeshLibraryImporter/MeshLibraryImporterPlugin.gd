@@ -40,17 +40,50 @@ func get_import_options(preset):
 func get_all_children(node, only_visible=true):
 	var children = []
 	for child in node.get_children():
-		if child.get_child_count() > 0:
+		if child.get_child_count() > 0 and not child is Skeleton:
 			children += get_all_children(child)
-		elif child is Spatial and child.visible or not only_visible:
+		elif child is Spatial and (child.visible or not only_visible):
 			children.append(child)
 	return children
 
 func export_library(path, scene): # Return saved library path
 	var library = MeshLibrary.new(); library.clear()
-	var regex = RegEx.new(); assert(regex.compile("^(\\d+)([BGPRYN])?_(.+)") == OK) # 'N' prefix for Gray
+	var regex = RegEx.new(); assert(regex.compile("^(\\d+)([BGPRYN])?_(.+)") == OK) # 'N' prefix for Nightmare
 
+	# Update tree for extras from:
+	# [Root]
+	# ┠╴Skeleton
+	# ┃  ┖╴MeshInstance
+	# ┠╴AnimationPlayer
+	#
+	# to:
+	# [Root]
+	# ┖╴MeshInstance # Need to update node path for `skeleton` property
+	#    ┠╴Skeleton
+	#    ┖╴AnimationPlayer # Keep on same level that "Skeleton" for tracks to be valid
+
+	var player = scene.get_node("AnimationPlayer")
+	var anim = player.get_animation_list()[0]
+	player.get_animation(anim).loop = true
+	player.autoplay = anim
+	player.playback_speed = 0.45
+
+	var extra_nodes = []
 	for node in get_all_children(scene):
+		if node is Skeleton:
+			var skeleton = node
+			var mesh = skeleton.get_child(0); assert(mesh and mesh is MeshInstance)
+			scene.remove_child(skeleton)
+			skeleton.remove_child(mesh)
+			# Move skeleton and AnimationPlayer into MeshInstance
+			mesh.skeleton = NodePath(skeleton.name)
+			mesh.add_child(skeleton)
+			mesh.add_child(player.duplicate())
+			extra_nodes.append(mesh)
+
+			# Keep MeshInstance for MeshLib
+			node = mesh.duplicate(); scene.add_child(node)
+
 		var m = regex.search(node.name, 0)
 		if not m or not (node is MeshInstance): continue
 
@@ -110,8 +143,22 @@ func export_library(path, scene): # Return saved library path
 
 		print("### Added to library: %d @ \"%s\" (from `%s`)" % [id, cell_name, scene.get_path_to(node)])
 
+	# Save new scene with extra nodes
+	var root = Node.new()
+	for node in extra_nodes:
+		assert(not node.get_parent())
+		root.add_child(node); node.owner = root
+		for child in node.get_children(): child.owner = root
+
+	var extra = PackedScene.new(); assert(extra.pack(root) == OK)
+	var extra_path = "res://models/ImportedExtras.tscn"
+	root.print_tree_pretty()
+	assert(ResourceSaver.save(extra_path, extra) == OK)
+	print("### Saved extras as %s" % extra_path)
+
+	# Save mesh library
 	var path_format = "res://models/%s_%d.meshlib"
-	var filename = "ImportedMeshLib"; var suffix = 1;
+	var filename = "ImportedMeshLib"; var suffix = 2;
 	while File.new().file_exists(path_format % [filename, suffix]):
 		suffix += 1
 	var final_path = path_format % [filename, suffix]

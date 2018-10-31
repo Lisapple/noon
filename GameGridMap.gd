@@ -272,19 +272,33 @@ func _get_trees():
 	return trees
 
 func _replace_trees_season(season):
-	var new_name = "Tree-%s" % Season.name(season)
-	var new_item = theme.find_item_by_name(new_name)
-	for cell in _get_trees():
-		set_cell_itemv(cell, new_item)
+	var trees = _get_trees()
+	if season == Season.SPRING or trees.empty(): return
 
-var snow = SnowParticles.instance()
+	var new_name = "Tree-%s" % Season.name(season)
+	var extras = load("res://models/ImportedExtras.tscn").instance()
+	var tree = extras.find_node("*_"+new_name, false); assert(tree)
+	Helper.remove_from_parent(tree)
+
+	for cell in trees:
+		var rot = get_cell_quat(cell)
+		var node = tree.duplicate()
+		node.transform *= Transform(rot)
+		node.translation = cell + NODE_OFFSET
+		add_child(node)
+
+		set_cell_itemv(cell, GridMap.INVALID_CELL_ITEM)
+
+var snow # SnowParticles?
 var season = Season.SUMMER setget set_season
 func set_season(value):
 	season = value
 
-	if not snow.is_inside_tree():
+	if season == Season.WINTER and not snow:
+		var SnowParticles = load("res://particles/Snow.tscn")
+		snow = SnowParticles.instance()
 		add_child(snow); move_child(snow, orb_panel.get_index())
-	snow.emitting = (value == Season.WINTER)
+		snow.emitting = true
 
 	_update_path_color()
 	var SCENERY_NAME = "Straight-2"
