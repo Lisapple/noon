@@ -197,6 +197,27 @@ func _update_path_color():
 		var mesh = theme.get_item_mesh(item); assert(mesh is ArrayMesh)
 		mesh.surface_set_material(0, mat)
 
+var inactive_particles = {} # { cell:Vector3 : InactiveParticles }
+func _add_inactive_particles(season):
+	for lift in get_lifts():
+		var particles = load("res://particles/LiftParticles.tscn").instance()
+		inactive_particles[lift] = particles
+	for door in get_doors():
+		var particles = load("res://particles/DoorParticles.tscn").instance()
+		inactive_particles[door] = particles
+	for hole in get_holes():
+		var particles = load("res://particles/HoleParticles.tscn").instance()
+		inactive_particles[hole] = particles
+
+	for activable in inactive_particles:
+		var rot = get_cell_quat(activable)
+		var particles = inactive_particles[activable]
+		particles.transform *= Transform(rot)
+		particles.translation = activable + NODE_OFFSET + Vector3(0,0.5,0)
+		add_child(particles)
+		var orb = get_cell_orb(activable)
+		particles.set_orb(orb, season)
+
 func _get_tree_items():
 	var prefix = "Tree"
 	var items = []; for cell in get_used_cells():
@@ -251,6 +272,7 @@ func set_season(value):
 		mat.albedo_color = color
 		mat.flags_unshaded = nightmare
 
+	_add_inactive_particles(season)
 	_replace_trees_season(season)
 	_update_music_player()
 
@@ -1426,6 +1448,10 @@ func _on_cell_absorbed(cell, absorbed, animated):
 		light.get_node("Tween").interpolate_property(light, "light_energy",
 			light.light_energy, float(absorbed) * 0.5, 1.2,
 			Tween.TRANS_LINEAR, Tween.EASE_IN)
+
+	if inactive_particles.has(cell):
+		var particles = inactive_particles[cell]
+		particles.emitting = absorbed
 
 func _item_for(type, orb):
 	return ITEMS[type][orb]

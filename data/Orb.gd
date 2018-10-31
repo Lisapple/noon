@@ -23,3 +23,8 @@ static func color(orb, season=Season.SUMMER): # Color color(Orb, Season?)
 		Season.WINTER: {BLUE:"3E84A3", GREEN:"41C485", PURPLE:"9A70A3", RED:"C8636C", YELLOW:"DEC475"},
 		Season.SPRING: {BLUE:"618DA1", GREEN:"67BB92", PURPLE:"9B80A1", RED:"BF7E84", YELLOW:"D1C08D"}
 	}[season][orb])
+
+static func particle_color(orb, season=Season.SUMMER):
+		var c = color(orb, season)
+		c.s *= 1.2; c.v *= 1.3
+		return c
