@@ -15,8 +15,7 @@ class Player extends Spatial:
 		TURN_LEFT, TURN_RIGHT, HALF_TURN, # Turn +90º, -90º or +180º
 		ASCEND, DESCEND, # Climb/descend stairs
 		ASCEND_LIFT, DESCEND_LIFT,
-		TAKE, # Blend to take orb
-		WAITING, # (Always looping)
+		TAKE, # Lean to take orb
 		STAND_UP, # Player stand up for Intro
 		IDLE # Default pose
 	}
@@ -31,18 +30,37 @@ class Player extends Spatial:
 		ASCEND_LIFT: "Ascending Lift", DESCEND_LIFT: "Descending Lift",
 		TAKE: "Getting orb",
 		STAND_UP: "Stand up",
-		WAITING: "Waiting", IDLE: "Idle"
+		IDLE: "Idle"
+	}
+	var WAIT_PREFIX = "Waiting "
+	var WAITING_ANIMATIONS = {
+		Season.SUMMER: [ WAIT_PREFIX+"Summer", WAIT_PREFIX+"Summer 2" ],
+		Season.AUTUMN: [ WAIT_PREFIX+"Autumn", WAIT_PREFIX+"Autumn 2" ],
+		Season.WINTER: [ WAIT_PREFIX+"Winter", WAIT_PREFIX+"Winter 2" ],
+		Season.SPRING: [ WAIT_PREFIX+"Spring", WAIT_PREFIX+"Spring 2" ]
 	}
 
-	const ANIM_DURATIONS = { }
+	const ANIM_DURATIONS = { } # Duration with corrected speed
+	func duration(anim):
+		assert(ANIM_DURATIONS.has(anim))
+		return ANIM_DURATIONS[anim] / float(speed_factor)
+
+	const ANIM_SPEED = {
+		ABSORB: 1.3, ABSORB_NONE: 0.6,
+		RELEASE: 1.3, RELEASE_NONE: 0.6,
+		START: 1.4, STOP: 1.4,
+		WALK: 1.2, RUN: 1.4,
+		TURN_LEFT: 1.4, TURN_RIGHT: 1.4,
+		ASCEND: 1.5, DESCEND: 1.5
+	}
+	func _speed(anim):
+		if anim == null: return 1.0
+		assert(typeof(anim) == TYPE_INT)
+		return (ANIM_SPEED[anim] if ANIM_SPEED.has(anim) else 1.0) * speed_factor
 
 	static func name(anim):
 		assert(ANIMATIONS.has(anim))
 		return ANIMATIONS[anim]
-
-	func duration(anim):
-		assert(ANIM_DURATIONS.has(anim))
-		return ANIM_DURATIONS[anim] / float(speed_factor)
 
 	var animation_player setget ,get_animation_player
 	func get_animation_player():
@@ -80,11 +98,13 @@ class Player extends Spatial:
 			node.remove_child(node.get_node("Lift")) # DEBUG
 
 		animation_player = node.get_node("AnimationPlayer")
+		animation_player.connect("animation_started", self, "_on_animation_started")
+
 		set_speed_factor(speed_factor)
 		set_blend_enabled(blend_enabled)
 		for anim in ANIMS.values():
 			var animation = animation_player.get_animation(name(anim)); assert(animation)
-			ANIM_DURATIONS[anim] = animation.length
+			ANIM_DURATIONS[anim] = animation.length / _speed(anim)
 
 		default_tween.name = "Tween"
 		add_child(default_tween)
@@ -123,6 +143,24 @@ class Player extends Spatial:
 		var index = skeleton.find_bone("Skeleton")
 		var t = skeleton.get_bone_pose(index)
 		skeleton.set_bone_pose(index, t.translated(-t.origin))
+
+	func _on_animation_started(anim_name):
+		assert(get_animation_player().current_animation_position < 1e-3)
+
+		var name; for key in ANIMATIONS:
+			if ANIMATIONS[key] == anim_name: name = key
+		get_animation_player().playback_speed = _speed(name)
+
+	func play_waiting():
+		var anims = WAITING_ANIMATIONS[season]
+		var index = randi() % anims.size()
+		var anim = anims[index]
+		get_animation_player().play(anim)
+
+	func stop_waiting():
+		var player = get_animation_player()
+		if player.current_animation.begins_with(WAIT_PREFIX):
+			player.stop(false) # Stop only waiting animation
 
 var Anim = Player.ANIMS
 
@@ -346,7 +384,6 @@ func start():
 	player.rotation.y = get_walk_angle(get_begin())
 	player.speed_factor = PLAYER_SPEED
 	player.season = season
-	play_animation(Anim.WAITING)
 
 	add_child(audio_player)
 
@@ -377,6 +414,7 @@ func start():
 	orb_panel.connect("paused", self, "_on_paused")
 	orb_panel.set_visible(true, true)
 
+	play_animation(Player.IDLE)
 	set_input_enabled(true)
 	reload_spots()
 
@@ -1488,16 +1526,16 @@ func _rotate_player_by(radians, duration):
 func can_reverse(anim):
 	return false
 
-func queue_animation(anim, reversed=false, delay=0):
-	call_after(delay, "play_animation", [anim, reversed, true])
+func queue_animation(anim, reversed=false):
+	play_animation(anim, reversed, true)
 
+# Play boy's `anim` animation.
 func play_animation(anim, reversed=false, should_queue=false):
 	assert(not reversed or can_reverse(anim))
+	player.stop_waiting()
 
 	var name = Player.name(anim)
-	print("$$$ Queue anim %s%s" % [name, " [reversed]" if reversed else ""]) # DEBUG
-
-	var anim_player = player.get_animation_player()
+	#print("$$$ Queue anim %s%s" % [name, " [reversed]" if reversed else ""]) # DEBUG
 	anim_player.queue(name) if should_queue else anim_player.play(name)
 
 	var angle = 0; match anim:
@@ -1509,6 +1547,17 @@ func play_animation(anim, reversed=false, should_queue=false):
 	# TODO: Play `anim` if the previous has done or is looping
 	yield(anim_player, "animation_finished")
 	emit_signal(ANIM_DONE_SIGNAL, anim)
+	_on_animation_played()
+
+func _on_animation_played():
+	var anim_player = player.get_animation_player()
+	if not anim_player.is_playing():
+		var delay = 5 + randi() % 3 # 5-8s
+		call_after(delay, "_on_player_wait")
+
+func _on_player_wait():
+	player.play_waiting()
+
 
 var spot_nodes = {} # {Vector3 : MeshInstance}
 func add_spot_node(position):
