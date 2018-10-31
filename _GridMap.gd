@@ -360,6 +360,7 @@ func _closest_edges(from, to):
 	PointSorter.set_to(null)
 	return edges
 
+#func _closest_reachable_path_for(actor: enum Actor, from: Vector3, to: Vector3, orb: Orb=null) -> [Vector3]
 func _closest_reachable_path_for(actor, from, to_closest, orb=null):
 	assert(actor != Actor.PARTICLE or orb != null)
 
@@ -562,6 +563,8 @@ func round_rect(rect):
 	return rect
 
 func generate_distmap(only_bottom=false): # DEBUG
+	if not ClassDB.can_instance("SSEDT8"): return null
+	assert(_DEBUG_)
 	var scale = Vector2(2, 2)
 	var margin = 10
 
@@ -585,9 +588,8 @@ func generate_distmap(only_bottom=false): # DEBUG
 
 	img.resize(size.x * 2, size.z * 2, Image.INTERPOLATE_NEAREST)
 
-	#var map = SSEDT8.new().from(img, 0.02)
-	#map.resize(size.x * 1, size.z * 1, Image.INTERPOLATE_BILINEAR)
-	#assert(map.generate_mipmaps() == OK)
-	#assert(not map.is_empty())
-	#return map
-	return null
+	var map = ClassDB.instance("SSEDT8").from(img, 0.02)
+	map.resize(size.x * 1, size.z * 1, Image.INTERPOLATE_BILINEAR)
+	assert(map.generate_mipmaps() == OK)
+	assert(not map.is_empty())
+	return map

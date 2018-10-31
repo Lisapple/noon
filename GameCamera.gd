@@ -125,12 +125,11 @@ func set_position(position, speed=2.85): # Speed is average in m/s
 
 	var duration = 1.2
 	var distance = pos.distance_to(position)
-	if distance > 0.35:
+	if distance > 0.5:
 		duration = pow(distance, 0.4) / max(0.1, speed * CAMERA_SPEED_FACTOR)
 
 	tween.interpolate_property(self, "translation", pos+_camera_offset(), position+_camera_offset(),
-		duration, Tween.TRANS_LINEAR, Tween.EASE_IN)
-	#tween.start()
+		duration, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
 
 func set_scale(to_scale, animated=true):
 	to_scale = clamp(to_scale, 5, 15)

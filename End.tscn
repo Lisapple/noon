@@ -62,7 +62,8 @@ func _ready():
 	$RestartButton.connect(\"pressed\", self, \"_on_restart_pressed\")
 
 func _on_restart_pressed():
-	emit_signal(\"restart_pressed\")"
+	emit_signal(\"restart_pressed\")
+	Helper.remove_from_parent(self)"
 
 [sub_resource type="DynamicFont" id=3]
 

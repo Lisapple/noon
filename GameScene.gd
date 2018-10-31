@@ -37,6 +37,7 @@ func _ready():
 		preload("res://QuoteManager.gd").get_all_quotes()
 		assert(not preload("res://QuoteManager.gd").get_quotes(["Level34", "Level33"]).empty())
 		progression.available_orbs = [Orb.BLUE, Orb.GREEN, Orb.PURPLE, Orb.RED]
+		progression.current_level = null
 		progression.save()
 
 	add_child(camera)
@@ -273,6 +274,9 @@ func _present_scene(scene, start_name=null):
 	scene.theme = preload("res://models/ImportedMeshLib.meshlib").duplicate(true)
 	if start_name:
 		scene.set_start(start_name)
+
+	var is_nightmare = scene.name.begins_with("Nightmare")
+	set_raining(is_nightmare, false)
 
 	add_child(scene)
 	current_scene = scene

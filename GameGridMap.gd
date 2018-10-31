@@ -168,8 +168,6 @@ const Activable = preload("res://Activable.gd")
 const OrbPanel = preload("res://OrbPanel.tscn")
 const SoundPlayer = preload("res://SoundPlayer.gd")
 const GameCamera = preload("res://GameCamera.gd")
-const TorchParticles = preload("res://particles/TorchParticles.tscn")
-const SnowParticles = preload("res://particles/Snow.tscn")
 
 signal player_hurt()
 
@@ -211,6 +209,7 @@ func set_start(name):
 var ambience = Ambience.DEFAULT setget set_ambience
 func set_ambience(value):
 	ambience = value
+	assert(camera)
 	camera.set_default_environment(ambience)
 	_update_path_color()
 	_update_music_player()
@@ -368,7 +367,11 @@ func _test_level_integrity():
 			assert( neighboor.y == hole.y )
 
 func _ready():
+	get_viewport().connect("size_changed", self, "_on_frame_changed")
 	call_deferred("start")
+
+func _on_frame_changed():
+	if snow: snow.position.x = get_viewport().size.x / 2
 
 func get_walk_angle(from): # The angle (radians) to walkable cell next to `from`
 	if _DEBUG_:
@@ -401,9 +404,9 @@ func start():
 
 	add_child(audio_player)
 
-	if _DEBUG_: # DEBUG
-		_test_level_integrity()
-		get_tree().debug_collisions_hint = true
+	if _DEBUG_: _test_level_integrity()
+
+	randomize()
 	init_path_extension()
 	init_ocean()
 	setup_camera()
@@ -451,13 +454,12 @@ func init_ocean():
 	var texture
 	if ResourceLoader.has(path):
 		texture = load(path)
-	else:
-		# DEBUG
-		#var map = generate_distmap(true)
-		#map.save_png(path)
-		#texture = ImageTexture.new()
-		#texture.create_from_image(map, Texture.FLAG_MIPMAPS)
-		pass
+	elif _DEBUG_:
+		var map = generate_distmap(true)
+		if map:
+			map.save_png(path)
+			texture = ImageTexture.new()
+			texture.create_from_image(map, Texture.FLAG_MIPMAPS)
 
 	var bounds = get_bounds_margin_all(15)
 	var center = bounds.position + (bounds.size / Vector3(2,2,2))
@@ -531,6 +533,7 @@ var TORCH_PARTICLE_OFFSET = AREA_OFFSET + Vector3(0,0.6,0)
 var torch_particles = {} # {Vector3 : TorchParticles}
 func setup_torchs():
 	for torch in get_torches():
+		var TorchParticles = load("res://particles/TorchParticles.tscn")
 		var particles = TorchParticles.instance()
 		particles.translation = torch + TORCH_PARTICLE_OFFSET
 		particles.orb = get_cell_orb(torch)
@@ -625,13 +628,13 @@ func _on_end_accessible(end_name):
 		var end = get_ends()[get_end_names().find(end_name)]
 		move_player(end)
 		# Move wolf to end
-		var wolf = preload("res://models/wolf.tscn").instance()
+		var wolf = load("res://models/wolf.tscn").instance()
 		add_child(wolf); glide(wolf, get_begin(), end)
 		# Add moon light reflect near to end
-		var moon = preload("res://models/MoonLight.tscn").instance()
+		var moon = load("res://models/MoonLight.tscn").instance()
 		var offset = Vector3(-1.5, _get_level_bottom(), 3.5)
 		var angle = _get_end_angle()
-		moon.translation = get_start() + offset.rotated(UP, angle)
+		moon.translation = get_start() + offset.rotated(UP, angle) * 0.8
 		moon.opacity = 0; add_child(moon)
 		var tween = moon.get_node("Tween")
 		tween.interpolate_property(moon, "opacity", 0, 1,
@@ -649,7 +652,7 @@ func toggle_pause():
 		pause_menu = null
 		get_tree().paused = false
 	else:
-		pause_menu = preload("res://PauseMenu.tscn").instance()
+		pause_menu = load("res://PauseMenu.tscn").instance()
 		pause_menu.connect("resumed", self, "toggle_pause")
 		pause_menu.connect("restarted", self, "_on_restarted")
 		pause_menu.set_sounds_mute(audio_player.muted)
@@ -701,7 +704,6 @@ func move_player(to):
 	if to == from: return # DEBUG (`move_player` should not be called if same position)
 	var id = closest_reachable_path_for(Actor.PLAYER, from, to, null, true)
 	var path = yield(self, id)
-	#print("Moving %s to %s: %s" % [from, to, path]) # DEBUG
 	walk(player, path)
 	_on_reaching_cell(to)
 
@@ -932,8 +934,7 @@ func _update_spots():
 
 var _reloading = false
 func reload_spots():
-	if _reloading:
-		print("Already reloading"); return
+	if _reloading: return
 	call_deferred("_reload_spots"); _reloading = true
 func _reload_spots():
 	#if not force and not level_animation_player.is_idle(): return # Wait for all animations to finish
@@ -1018,7 +1019,6 @@ func _update_camera(): # TODO: Pass future player pos to update position when pl
 	Helper.distinct(cells); for cell in cells: center += cell * wpath
 
 	center /= (wplayer + wspot * spots.size() + wactivable * activables.size() + wpath * cells.size())
-	#print("Camera center: %s (%s spots, %s activables)" % [center, spots.size(), activables.size()])
 	camera.set_position(center)
 
 	var cam = camera.duplicate(true); add_child(cam)
@@ -1063,6 +1063,8 @@ var PARTICLE_SPEED = 7.0 if _DEBUG_ else 4.0 # cells per second
 
 class ParticlesNode extends Spatial:
 
+	signal moved(from, to)
+
 	var orb setget ,get_orb
 	func get_orb():
 		return particles.orb if particles else -1
@@ -1103,9 +1105,9 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 			to = path_for(Actor._HOLLOW, from, to)[1]
 			var destination = from.linear_interpolate(to, 0.3)
 			_move_particle(node, destination)
-			yield(tween, "tween_completed")
+			yield(node, "moved")
 			_move_particle(node, from)
-			yield(tween, "tween_completed")
+			yield(node, "moved")
 			particles.emitting = false
 			Helper.remove_from_parent(node)
 
@@ -1113,7 +1115,7 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 				call_deferred(end_callback, orb, Behaviour.BOUNCING)
 			return false
 		else:
-			assert(path[1].y <= path[0].y)
+			assert(path[1].y <= path[0].y) # ???: Why?
 
 	assert(not node_paths.has(node))
 	node_paths[node] = path
@@ -1136,10 +1138,12 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 	return true
 
 func get_particle_next_cell(node, cell, step=1): # Vector3? get_particle_next_cell(ParticlesNode, Vector3, int?)
+	assert(node is ParticlesNode)
 	var path = node_paths[node]; assert(path); var index = path.find(cell)
 	return path[index+step] if index != -1 and index+step < path.size() else null
 
 func particle_behaviour(node, orb, cell): # enum Behaviour particle_behaviour(ParticlesNode, Orb, Vector3)
+	assert(node is ParticlesNode)
 	var reversed = reversed_particles.has(node)
 	var next = get_particle_next_cell(node, cell, -1 if reversed else 1)
 	if next == null: # End of path reached
@@ -1152,9 +1156,6 @@ func particle_behaviour(node, orb, cell): # enum Behaviour particle_behaviour(Pa
 	if path.find(cell) == 0 and reversed: # Bounced back to start
 		return Behaviour.ABSORBED # Bouncing back to start
 
-	# Disallow particle to access higher level on non-matching lift
-	#if not allow_reaching(Actor.PARTICLE, cell, next):
-	#	return Behaviour.BOUNCING
 	if is_lift(cell) and not is_lift_up(cell) and not is_matching(cell, orb) and cell.y < next.y:
 		assert(false) # ???: can it be triggered?
 
@@ -1166,9 +1167,11 @@ func particle_behaviour(node, orb, cell): # enum Behaviour particle_behaviour(Pa
 	assert(is_valid(next))
 	return behaviour(next, orb)
 
+# Note: `node` emits "moved" when finished
 func _move_particle(node, to):
+	assert(node is ParticlesNode)
 	var from = node.translation
-	var tween = node.get_node("tween")
+	var tween = node.get_node("tween"); tween.start()
 	tween.interpolate_property(node, "translation", from, to,
 		1.0 / PARTICLE_SPEED, Tween.TRANS_LINEAR, Tween.EASE_IN)
 
@@ -1177,13 +1180,17 @@ func _move_particle(node, to):
 		from_ofs.y += 0.6
 	elif is_torch(to) and not can_activate(to, node.orb):
 		to_ofs.y += 0.6
-	tween.interpolate_property(node.particles, "translation", from_ofs, to_ofs,
-		1.0 / PARTICLE_SPEED, Tween.TRANS_LINEAR, Tween.EASE_IN)
+	if from_ofs != to_ofs:
+		tween.interpolate_property(node.particles, "translation", from_ofs, to_ofs,
+			1.0 / PARTICLE_SPEED, Tween.TRANS_LINEAR, Tween.EASE_IN)
+		yield(tween, "tween_completed")
 
-	tween.start()
+	yield(tween, "tween_completed")
+	node.emit_signal("moved", from, to)
 
 var reversed_particles = [] # [Particle]
 func advance_particle(node, end_callback=""):
+	assert(node is ParticlesNode)
 	var cell = round3(node.translation)
 	var behaviour = particle_behaviour(node, node.orb, cell)
 	match behaviour:
@@ -1207,7 +1214,7 @@ func advance_particle(node, end_callback=""):
 
 			# Move particle to `destination`
 			_move_particle(node, destination)
-			yield(node.get_node("tween"), "tween_completed")
+			yield(node, "moved")
 
 			# Cleanup particle node
 			node_paths.erase(node)
@@ -1233,11 +1240,10 @@ func advance_particle(node, end_callback=""):
 	var reversed = reversed_particles.has(node)
 	var to = get_particle_next_cell(node, cell, -1 if reversed else 1)
 	_move_particle(node, to)
-	yield(node.get_node("tween"), "tween_completed")
+	yield(node, "moved")
 
 	if behaviour == Behaviour.BOUNCING:
 		_on_particle_bounced(node, node.orb, to)
-		print("bounced")
 
 	advance_particle(node, end_callback)
 
@@ -1256,8 +1262,8 @@ func _on_particle_bounced(node, orb, position):
 
 	var panel = preload("res://BounceWavePanel.tscn").instance()
 	# Place below orbs panel to avoid (transparent) orbs buttons to disappear
-	add_child(panel); move_child(panel, snow.get_index())
-	assert(snow.is_greater_than(panel))
+	add_child(panel); move_child(panel, orb_panel.get_index())
+	if snow: move_child(panel, snow.get_index())
 
 	var center = camera.unproject_position(position + Vector3(0,1,0))
 	panel.play_wave(center)
@@ -1272,6 +1278,7 @@ func _on_particle_bounced(node, orb, position):
 		camera.shake(1.1, 1.4)
 
 func _on_particle_moved(node, orb, to_pos, behaviour): # Bounced back to start if behaviour == BOUNCING
+	assert(node is ParticlesNode)
 	moving_particles -= 1;
 	if moving_particles == 0: all_particles_moved()
 
@@ -1285,8 +1292,9 @@ func _on_particle_moved(node, orb, to_pos, behaviour): # Bounced back to start i
 		activate(to_pos)
 
 	audio_player.stop(Sound.PARTICLES)
-	node.particles.restart() # DEBUG
-	node.particles.emitting = false
+	#node.particles.restart() # DEBUG
+	#node.particles.emitting = false
+	node.particles.hide()
 
 	var timer = Timer.new(); add_child(timer)
 	timer.wait_time = 0.5; timer.autostart = true
@@ -1377,7 +1385,6 @@ func start_releasing(orb):
 		var nearests = []
 		for cell in get_activables():
 			if can_activate(cell, orb):
-				prints(cell, get_player_pos())
 				var id = closest_reachable_path_for(Actor.PARTICLE, get_player_pos(), cell, orb, true)
 				var path = yield(self, id); assert(path.size() >= 2)
 				var path_to_closest = path_for(Actor._HOLLOW, path[path.size()-2], cell)
@@ -1395,7 +1402,7 @@ func start_releasing(orb):
 				if angle < min_angle:
 					nearest = cell
 
-	print("Nearest activable: %s" % nearest) if nearest != null else print("No activable")
+	print(("Nearest activable: %s" % nearest) if nearest != null else "No activable")
 
 	if nearest != null:
 		set_input_enabled(false)
@@ -1429,7 +1436,7 @@ func release_orb_ended(orb, behaviour):
 func absorb(cell):
 	if not can_absorb(cell, null): return
 
-	prints("Absorb:", cell)
+	#prints("Absorb:", cell)
 	var player_on_lift = (is_lift_up(cell) and cell == get_lift_bottom(get_player_pos()))
 	set_cell_activated(cell, false)
 	if player_on_lift:
@@ -1444,7 +1451,7 @@ func absorb(cell):
 func activate(cell):
 	if not can_activate(cell, null): return
 
-	prints("Activate:", cell)
+	#prints("Activate:", cell)
 	var on_lift = is_player_on_lift()
 	set_cell_activated(cell, true)
 	if is_lift(cell) and on_lift:
@@ -1524,19 +1531,19 @@ func _on_cell_absorbed(cell, absorbed, animated):
 func _item_for(type, orb):
 	return ITEMS[type][orb]
 
-var rotationPlayer = AnimationPlayer.new()
+var rotation_player = AnimationPlayer.new()
 func _queue_player_rotation(radians, duration):
-	if not rotationPlayer.is_inside_tree():
-		rotationPlayer.name = "RotationPlayer"
-		add_child(rotationPlayer)
+	if not rotation_player.is_inside_tree():
+		rotation_player.name = "RotationPlayer"
+		add_child(rotation_player)
 
 	#prints("Queue player rotation:", radians)
 	var animation = method_animation("_rotate_player_by", [radians, duration])
 	animation.length = duration
 
 	var name = "rotation-%d" % randi()
-	rotationPlayer.add_animation(name, animation)
-	rotationPlayer.queue(name)
+	rotation_player.add_animation(name, animation)
+	rotation_player.queue(name)
 
 func _rotate_player_by(radians, duration):
 	var tween = Tween.new(); tween.name = "_RotationTween"
@@ -1589,34 +1596,40 @@ func _on_player_wait():
 	player.play_waiting()
 
 
+var spot_node
 var spot_nodes = {} # {Vector3 : MeshInstance}
 func add_spot_node(position):
 	remove_spot_node(position)
 
-	var mesh = PlaneMesh.new()
-	mesh.size = Vector2(0.5, 0.5)
+	if not spot_node:
+		var mesh = QuadMesh.new()
+		mesh.size = Vector2(0.5, 0.5)
 
-	var mat = SpatialMaterial.new()
-	mat.flags_unshaded = true
-	mat.flags_transparent = true
-	mat.albedo_color = Season.scenery_color(season)
-	mat.albedo_texture = preload("res://textures/hotspot.png")
-	mesh.material = mat
+		var mat = SpatialMaterial.new()
+		mat.flags_unshaded = true
+		mat.flags_transparent = true
+		mat.albedo_color = Season.scenery_color(season)
+		mat.albedo_texture = preload("res://textures/hotspot.png")
+		mesh.material = mat
 
-	var node = MeshInstance.new(); node.name = "PathSpot"
-	node.mesh = mesh
-	node.translation = position + Vector3(0.5, 0.02, 0.5)
-	node.translation.y += int(is_lift_up(position))
-	node.scale = Vector3()
+		spot_node = MeshInstance.new(); spot_node.name = "PathSpot"
+		spot_node.mesh = mesh
+		spot_node.rotation.x = -PI/2
+
+		var tween = Tween.new(); tween.name = "Tween"
+		spot_node.add_child(tween); tween.start()
+
 	if is_lift_up(position): dassert(position.y-1 == get_lift_bottom(position).y) # DEBUG
 
-	add_child(node)
-	spot_nodes[position] = node
+	var node = spot_node.duplicate()
+	add_child(node); spot_nodes[position] = node
+	node.translation = position + Vector3(0.5, 5e-3, 0.5)
+	node.translation.y += int(is_lift_up(position))
 
-	var tween = Tween.new(); tween.name = "Tween"
-	node.add_child(tween); tween.start()
+	node.scale = Vector3()
+	var tween = node.get_node("Tween"); tween.start()
 	tween.interpolate_property(node, "scale",
-		Vector3(), Vector3(1,1,1), 1.0, Tween.TRANS_ELASTIC, Tween.EASE_IN)
+		Vector3(), Vector3(1,1,1), 1.0, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
 
 func remove_spot_node(position):
 	if spot_nodes.has(position):
@@ -1646,13 +1659,26 @@ func method_animation(method, args=[]):
 	animation.track_insert_key(track, 0, info)
 	return animation
 
+var delay_timers = {} # { method:string : Timer }
 func call_after(delay, method, args=[]):
-	if delay > 0.1:
-		var timer = Timer.new(); timer.wait_time = delay
-		add_child(timer); timer.start()
-		yield(timer, "timeout")
-		Helper.remove_from_parent(timer)
+	var timer
+	if delay_timers.has(method):
+		timer = delay_timers[method]
+		timer.disconnect("timeout", self, "_on_call_delayed")
+	else:
+		timer = Timer.new(); add_child(timer)
+
+	timer.connect("timeout", self, "_on_call_delayed", [method, args])
+	timer.wait_time = max(0.1, delay)
+	delay_timers[method] = timer
+	timer.start()
+
+func _on_call_delayed(method, args):
 	callv(method, args)
+
+	var timer = delay_timers[method]
+	Helper.remove_from_parent(timer)
+	delay_timers.erase(method)
 
 ## DEPRECATED
 

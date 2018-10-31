@@ -6,6 +6,9 @@ func _test_level_integrity():
 	pass
 
 func start():
+	if Helper.DEBUG_ENABLED:
+		progression.available_orbs.erase(Orb.RED)
+
 	start_end = get_cells(START)[0]
 	assert(get_orbs().size() == 1)
 	.start()

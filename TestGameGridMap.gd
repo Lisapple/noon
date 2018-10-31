@@ -289,7 +289,7 @@ func run():
 			{"type": ABSORB, "orb": Orb.BLUE}
 		],
 		"Outro": [
-			{"type": MOVE, "to": Vector3(-2,0,-3)},
+			{"type": MOVE, "to": Vector3(-3,0,-3)},
 			{"type": WAIT, "secs": 2.0},
 			{"type": MOVE, "to": Vector3(2,0,-4)},
 			{"type": WAIT, "secs": 2.0},

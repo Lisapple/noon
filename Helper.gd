@@ -12,7 +12,8 @@ static func test():
 	assert(get(dict, "c", 3) == 3)
 
 	assert(first_match("abc(\\d{3})", "abc123") == "123")
-	
+	assert(first_match("abc(.)", "abde") == null)
+
 	assert(has_all([1,3,2,4], [1,2]))
 	assert(not has_all([1,2,3], [2,4]))
 

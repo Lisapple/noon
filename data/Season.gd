@@ -29,10 +29,6 @@ static func _level_number(name):
 		return int(Helper.first_match("Level(\\d{1,2})", name))
 
 static func for_level(name, orbs):
-	print(Season.name(_for_level(name, orbs)))
-	return _for_level(name, orbs)
-
-static func _for_level(name, orbs):
 	var number = _level_number(name)
 	if number >= 45:
 		return SPRING
