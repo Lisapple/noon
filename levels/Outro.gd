@@ -3,7 +3,7 @@ extends "res://TestGameGridMap.gd"
 const Quote = preload("res://Quote.gd")
 const QuotePanel = preload("res://QuotePanel.gd")
 
-var ORB_SPOTS = {
+var ORB_SPOTS := {
 	Orb.BLUE: 	Vector3(2,0,-4),
 	Orb.GREEN: 	Vector3(6,0,-4),
 	Orb.PURPLE:	Vector3(10,0,-4),
@@ -11,7 +11,7 @@ var ORB_SPOTS = {
 	Orb.YELLOW:	Vector3(18,0,-4)
 }
 
-var QUOTE_KEYS = {
+var QUOTE_KEYS := {
 	Orb.BLUE:   "B-Outro",
 	Orb.GREEN:  "G-Outro",
 	Orb.PURPLE: "P-Outro",
@@ -30,11 +30,11 @@ func start():
 	var orbs = progression.available_orbs
 	assert(orbs == [Orb.BLUE, Orb.GREEN, Orb.PURPLE, Orb.RED])
 
-func init_path_extension():
+func init_path_extension(from_start:=true, from_ends:=true):
 	.init_path_extension(true, false)
 
-func get_spots():
-	var spots = .get_spots()
+func get_spots() -> PoolVector3Array:
+	var spots := Array(.get_spots())
 	spots.erase(get_start())
 
 	var orbs = progression.get_available_orbs()
@@ -47,9 +47,9 @@ func get_spots():
 	else:
 		spots.erase(get_ends()[0])
 
-	return spots
+	return PoolVector3Array(spots)
 
-func _on_walked(node, to):
+func _on_walked(node: Spatial, to: Vector3):
 	._on_walked(node, to)
 
 	var index = ORB_SPOTS.values().find(to)
@@ -57,15 +57,15 @@ func _on_walked(node, to):
 		var orb = ORB_SPOTS.keys()[index]
 		start_releasing(orb) # Release to matching torch
 
-func release_orb_ended(orb, behaviour):
+func release_orb_ended(orb: int, behaviour: int):
 	.release_orb_ended(orb, behaviour)
 	assert(behaviour == Behaviour.ABSORBED)
 	current_orb += 1
 
-	var quote = Quote.new()
+	var quote := Quote.new()
 	quote.key = QUOTE_KEYS[orb]; quote.orb = orb
 
-	var panel = QuotePanel.new()
+	var panel := QuotePanel.new()
 	panel.quotes = [ quote ]
 	add_child(panel)
 

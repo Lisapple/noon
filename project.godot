@@ -6,7 +6,17 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=3
+config_version=4
+
+_global_script_classes=[ {
+"base": "Node",
+"class": "Severity",
+"language": "GDScript",
+"path": "res://data/Severity.gd"
+} ]
+_global_script_class_icons={
+"Severity": ""
+}
 
 [application]
 
@@ -14,11 +24,14 @@ config/name="Noon"
 run/main_scene="res://GameScene.tscn"
 boot_splash/image="res://textures/launch.png"
 boot_splash/fullsize=false
+boot_splash/bg_color=Color( 0.2, 0.203922, 0.211765, 1 )
 config/icon="res://Icon.png"
 auto_accept_quit=true
 main_loop_type=""
 name="Noon"
 main_scene="Null"
+run/disable_stdout.release=true
+run/disable_stderr.release=true
 
 [autoload]
 
@@ -34,6 +47,11 @@ progression="*res://data/progression.gd"
 
 [debug]
 
+gdscript/completion/autocomplete_setters_and_getters=true
+gdscript/warnings/unsafe_property_access=true
+gdscript/warnings/unsafe_method_access=true
+gdscript/warnings/unsafe_cast=true
+gdscript/warnings/unsafe_call_argument=true
 shapes/collision/shape_color=Color( 1, 0, 0, 1 )
 shapes/collision/contact_color=Color( 0.1, 1, 0.578125, 0.8 )
 fps/force_fps=60
@@ -1126,4 +1144,4 @@ shadows_enabled=false
 
 quality/shadows/filter_mode=0
 environment/default_clear_color=Color( 0.2, 0.203922, 0.211765, 1 )
-quality/anisotropic_filter_level=2.0
+quality/filters/msaa.release=2

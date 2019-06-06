@@ -1,7 +1,7 @@
 extends "res://_GridMap.gd"
 
-var PLAYER_SPEED = 2.5 if _DEBUG_ else 1.4
-var PLAYER_OFFSET = AREA_OFFSET + Vector3(0,0.5,0)
+var PLAYER_SPEED := 2.5 if _DEBUG_ else 1.4
+var PLAYER_OFFSET := AREA_OFFSET + Vector3(0,0.5,0)
 
 class Player extends Spatial:
 
@@ -20,77 +20,77 @@ class Player extends Spatial:
 		IDLE # Default pose
 	}
 
-	const ANIMATIONS = {
-		ABSORB: "Using orb", ABSORB_NONE: "Cannot using orb",
-		RELEASE: "Using orb", RELEASE_NONE: "Cannot using orb",
-		START: "Start running", STOP: "Stop running",
-		WALK: "Walking", RUN: "Running",
-		TURN_LEFT: "Turn running", TURN_RIGHT: "Turn running", HALF_TURN: "Half turn",
-		ASCEND: "Ascending stairs", DESCEND: "Descending stairs",
-		ASCEND_LIFT: "Ascending Lift", DESCEND_LIFT: "Descending Lift",
-		TAKE: "Getting orb",
-		STAND_UP: "Stand up",
-		IDLE: "Idle"
+	var ANIMATIONS := {
+		ANIMS.ABSORB: "Using orb", ANIMS.ABSORB_NONE: "Cannot using orb",
+		ANIMS.RELEASE: "Using orb", ANIMS.RELEASE_NONE: "Cannot using orb",
+		ANIMS.START: "Start running", ANIMS.STOP: "Stop running",
+		ANIMS.WALK: "Walking", ANIMS.RUN: "Running",
+		ANIMS.TURN_LEFT: "Turn running", ANIMS.TURN_RIGHT: "Turn running", ANIMS.HALF_TURN: "Half turn",
+		ANIMS.ASCEND: "Ascending stairs", ANIMS.DESCEND: "Descending stairs",
+		ANIMS.ASCEND_LIFT: "Ascending Lift", ANIMS.DESCEND_LIFT: "Descending Lift",
+		ANIMS.TAKE: "Getting orb",
+		ANIMS.STAND_UP: "Stand up",
+		ANIMS.IDLE: "Idle"
 	}
-	var WAIT_PREFIX = "Waiting "
-	var WAITING_ANIMATIONS = {
+	var WAIT_PREFIX := "Waiting "
+	var WAITING_ANIMATIONS := {
 		Season.SUMMER: [ WAIT_PREFIX+"Summer", WAIT_PREFIX+"Summer 2" ],
 		Season.AUTUMN: [ WAIT_PREFIX+"Autumn", WAIT_PREFIX+"Autumn 2" ],
 		Season.WINTER: [ WAIT_PREFIX+"Winter", WAIT_PREFIX+"Winter 2" ],
 		Season.SPRING: [ WAIT_PREFIX+"Spring", WAIT_PREFIX+"Spring 2" ]
 	}
 
-	const ANIM_DURATIONS = { } # Duration with corrected speed
-	func duration(anim):
+	const ANIM_DURATIONS := { } # Duration with corrected speed
+	func duration(anim: int) -> float:
 		assert(ANIM_DURATIONS.has(anim))
 		return ANIM_DURATIONS[anim] / float(speed_factor)
 
-	const ANIM_SPEED = {
-		ABSORB: 1.3, ABSORB_NONE: 0.6,
-		RELEASE: 1.3, RELEASE_NONE: 0.6,
-		START: 1.4, STOP: 1.4,
-		WALK: 1.2, RUN: 1.4,
-		TURN_LEFT: 1.4, TURN_RIGHT: 1.4,
-		ASCEND: 1.5, DESCEND: 1.5
+	var ANIM_SPEED := {
+		ANIMS.ABSORB: 1.3, ANIMS.ABSORB_NONE: 0.6,
+		ANIMS.RELEASE: 1.3, ANIMS.RELEASE_NONE: 0.6,
+		ANIMS.START: 1.4, ANIMS.STOP: 1.4,
+		ANIMS.WALK: 1.2, ANIMS.RUN: 1.4,
+		ANIMS.TURN_LEFT: 1.4, ANIMS.TURN_RIGHT: 1.4,
+		ANIMS.ASCEND: 1.5, ANIMS.DESCEND: 1.5
 	}
-	func _speed(anim):
+	func _speed(anim) -> float:
 		if anim == null: return 1.0
-		assert(typeof(anim) == TYPE_INT)
+		assert(anim is int)
 		return (ANIM_SPEED[anim] if ANIM_SPEED.has(anim) else 1.0) * speed_factor
 
-	static func name(anim):
+	func name(anim: int) -> String:
 		assert(ANIMATIONS.has(anim))
 		return ANIMATIONS[anim]
 
-	var animation_player setget ,get_animation_player
-	func get_animation_player():
+	var animation_player: AnimationPlayer setget ,get_animation_player
+	func get_animation_player() -> AnimationPlayer:
 		return animation_player
 
-	var season = Season.SUMMER setget set_season
-	func set_season(value):
+	var season: int = Season.SUMMER setget set_season
+	func set_season(value: int):
 		season = value
 		_update()
 
-	var blend_enabled = true setget set_blend_enabled
-	func set_blend_enabled(value):
+	var blend_enabled := true setget set_blend_enabled
+	func set_blend_enabled(value: bool):
 		blend_enabled = value
 		if animation_player:
 			animation_player.playback_default_blend_time = 0.2 if value else 0
 
-	var speed_factor = 1.0 setget set_speed_factor
-	func set_speed_factor(value):
+	var speed_factor := 1.0 setget set_speed_factor
+	func set_speed_factor(value: float):
 		speed_factor = value
 		if animation_player:
 			animation_player.playback_speed = value
 
-	var default_tween = Tween.new() setget ,get_default_tween
-	func get_default_tween():
+	var default_tween := Tween.new() setget ,get_default_tween
+	func get_default_tween() -> Tween:
 		return default_tween
 
 	func _ready():
 		name = "Player"
 
-		var node = preload("res://models/player.dae").instance()
+		var node := preload("res://models/player.dae").instance()
 		node.rotation.y = PI
 		add_child(node)
 
@@ -100,10 +100,20 @@ class Player extends Spatial:
 		animation_player = node.get_node("AnimationPlayer")
 		animation_player.connect("animation_started", self, "_on_animation_started")
 
-		set_speed_factor(speed_factor)
+		# Add animation blending
 		set_blend_enabled(blend_enabled)
+		var transitions := [
+			[ANIMS.START, ANIMS.RUN],
+			[ANIMS.RUN, ANIMS.RUN],
+			[ANIMS.RUN, ANIMS.STOP]
+		]
+		for anims in transitions:
+			animation_player.set_blend_time(name(anims[0]), name(anims[1]), 0.0)
+
+		# Adjust animations speed
+		set_speed_factor(speed_factor)
 		for anim in ANIMS.values():
-			var animation = animation_player.get_animation(name(anim)); assert(animation)
+			var animation := animation_player.get_animation(name(anim)); assert(animation)
 			ANIM_DURATIONS[anim] = animation.length / _speed(anim)
 
 		default_tween.name = "Tween"
@@ -114,7 +124,7 @@ class Player extends Spatial:
 		if not is_inside_tree(): return
 
 		# Import new skeleton
-		var model = preload("res://models/Season player.dae").instance()
+		var model := preload("res://models/Season player.dae").instance()
 		var skeleton = model.get_node("Skeleton"); assert(skeleton)
 		skeleton.get_parent().remove_child(skeleton)
 		# Remove all seasons except `season` from `skeleton`
@@ -124,14 +134,14 @@ class Player extends Spatial:
 		assert(skeleton.get_child_count() == 1)
 		var torso = skeleton.get_child(0)
 		torso.name = "Torso" # Rename to match animation paths
-		
+
 		# Fix materials properties
 		for i in torso.mesh.get_surface_count()-1:
 			var mat = torso.get_surface_material(i); assert(mat is SpatialMaterial)
 			mat.roughness = 0.8
 
 		# Replace old skeleton (after removing "Torso" child node)
-		var root = get_child(0)
+		var root := get_child(0)
 		var old_skeleton = root.get_node("Skeleton")
 		var old_torso = old_skeleton.get_child(0); assert(old_torso.name == "Torso")
 		old_skeleton.remove_child(old_torso)
@@ -144,21 +154,21 @@ class Player extends Spatial:
 		var t = skeleton.get_bone_pose(index)
 		skeleton.set_bone_pose(index, t.translated(-t.origin))
 
-	func _on_animation_started(anim_name):
+	func _on_animation_started(anim_name: String):
 		assert(get_animation_player().current_animation_position < 1e-3)
 
-		var name; for key in ANIMATIONS:
+		var name: int; for key in ANIMATIONS:
 			if ANIMATIONS[key] == anim_name: name = key
 		get_animation_player().playback_speed = _speed(name)
 
 	func play_waiting():
-		var anims = WAITING_ANIMATIONS[season]
-		var index = randi() % anims.size()
+		var anims := WAITING_ANIMATIONS[season] as Array
+		var index := randi() % anims.size()
 		var anim = anims[index]
 		get_animation_player().play(anim)
 
 	func stop_waiting():
-		var player = get_animation_player()
+		var player := get_animation_player()
 		if player.current_animation.begins_with(WAIT_PREFIX):
 			player.stop(false) # Stop only waiting animation
 
@@ -183,7 +193,6 @@ signal _anim_finished(anim)
 
 const ANIM_DONE_SIGNAL = "_anim_finished"
 
-const START_NAME = "Start"
 var END_NAMES = { # Use `get_end_names()` instead
 	"Level30": ["End-G", "End-R"],
 	"*": ["End"]
@@ -195,43 +204,44 @@ func get_begin():
 	if index != -1: begin = get_ends()[index]
 	return begin
 
-var camera # GameCamera!
-var audio_player = SoundPlayer.new()
-var orb_panel = OrbPanel.instance()
-var default_light = DirectionalLight.new()
-var secondary_light = DirectionalLight.new()
-var player = Player.new()
+var camera := GameCamera.new()
+var audio_player := SoundPlayer.new()
+var orb_panel := OrbPanel.instance()
+var default_light := DirectionalLight.new()
+var secondary_light := DirectionalLight.new()
+var player := Player.new()
 
-var start_name = START_NAME setget set_start
-func set_start(name):
+var start_name := START_NAME setget set_start
+func set_start(name: String):
 	start_name = name
 
-var ambience = Ambience.DEFAULT setget set_ambience
-func set_ambience(value):
+var ambience: int = Ambience.DEFAULT setget set_ambience
+func set_ambience(value: int):
 	ambience = value
 	assert(camera)
 	camera.set_default_environment(ambience)
 	_update_path_color()
 	_update_music_player()
 
-func _get_item_surface(item_name, surface_name):
-	var item = theme.find_item_by_name(item_name)
-	var mesh = theme.get_item_mesh(item); assert(mesh is ArrayMesh)
-	var surface = Helper.get_surface_named(mesh, surface_name); assert(surface != -1)
-	var mat = mesh.surface_get_material(surface); assert(mat is SpatialMaterial)
-	return mat
+func _get_item_surface(item_name: String, surface_name: String) -> SpatialMaterial:
+	var item := self.mesh_library.find_item_by_name(item_name)
+	var mesh := self.mesh_library.get_item_mesh(item) as ArrayMesh
+	var surface := Helper.get_surface_named(mesh, surface_name); assert(surface != -1)
+	return mesh.surface_get_material(surface) as SpatialMaterial
 
 func _update_path_color():
-	var nightmare = (ambience == Ambience.NIGHTMARE)
+	var nightmare := (ambience == Ambience.NIGHTMARE)
 	var color = Season.path_color(season)
 	if nightmare:
 		color = color.lightened(0.25); color.s *= 2.0
-	var mat = _get_item_surface(PATH_PREFIX, "Path")
-	mat.flags_unshaded = not nightmare; mat.albedo_color = color
+	
+	var mat := _get_item_surface(PATH_PREFIX, "Path")
+	mat.albedo_color = color
+	
 	# Fix start and ends material path
 	for name in [START_NAME, END_NAME, END_2_NAME]:
-		var item = theme.find_item_by_name(name)
-		var mesh = theme.get_item_mesh(item); assert(mesh is ArrayMesh)
+		var item := self.mesh_library.find_item_by_name(name)
+		var mesh := self.mesh_library.get_item_mesh(item) as ArrayMesh
 		mesh.surface_set_material(0, mat)
 
 var inactive_particles = {} # { cell:Vector3 : InactiveParticles }
@@ -259,7 +269,7 @@ func _get_tree_items():
 	var prefix = "Tree"
 	var items = []; for cell in get_used_cells():
 		var item = get_cell_itemv(cell)
-		if theme.get_item_name(item).begins_with(prefix):
+		if self.mesh_library.get_item_name(item).begins_with(prefix):
 			items.append(item)
 	return items
 
@@ -343,17 +353,17 @@ func _test_level_integrity():
 	assert( start )
 	assert( [1,2].has(get_ends().size()) )
 	assert( camera is GameCamera )
-	#assert( theme.resource_path == "res://models/ImportedMeshLib_8.meshlib" )
+	#assert( self.mesh_library.resource_path == "res://models/ImportedMeshLib_8.meshlib" )
 	# Check that two activables are *not* neighboors
 	var activables = get_activables() + get_orbs()
 	for activable in activables:
 		for neighbor in _neighbors(activable):
-			assert(not activables.has(neighbor))
+			assert(not Array(activables).has(neighbor))
 	# Check that items exist in library (and here are no path extension)
 	for cell in get_used_cells():
 		var item = get_cell_itemv(cell)
-		assert(Array(theme.get_item_list()).has(item))
-		assert(theme.get_item_mesh(item))
+		assert(Array(self.mesh_library.get_item_list()).has(item))
+		assert(self.mesh_library.get_item_mesh(item))
 		assert(item != PATH_EXT) # Notice: Remove all path extensions from grid
 	# Check the reachability of all cells
 	for cell in get_used_cells():
@@ -363,10 +373,12 @@ func _test_level_integrity():
 	for hole in get_holes():
 		for neighboor in edges(hole):
 			var item = get_cell_itemv(neighboor)
-			assert( theme.get_item_name(item).begins_with(PATH_PREFIX) )
+			assert( self.mesh_library.get_item_name(item).begins_with(PATH_PREFIX) )
 			assert( neighboor.y == hole.y )
 
 func _ready():
+	add_child(camera)
+	
 	get_viewport().connect("size_changed", self, "_on_frame_changed")
 	call_deferred("start")
 
@@ -375,7 +387,7 @@ func _on_frame_changed():
 
 func get_walk_angle(from): # The angle (radians) to walkable cell next to `from`
 	if _DEBUG_:
-		var ns = 0; for n in _neighbors(from): ns += int(is_walkable(n)); dassert(ns == 1) # DEBUG
+		var ns = 0; for n in _neighbors(from): ns += int(is_walkable(n)); assert(ns == 1) # DEBUG
 
 	var next; for cell in _neighbors(from):
 		if is_walkable(cell):
@@ -389,6 +401,8 @@ func get_level_angle(): # Get angle (radians) to player's back (i.e. first move 
 	return _level_angle
 
 func start():
+	cell_scale = 1+1e-3 # Fixing cells aliasing
+
 	var is_nightmare = name.begins_with("Nightmare")
 	self.ambience = Ambience.NIGHTMARE if is_nightmare else Ambience.DEFAULT
 	self.season = season # Force color theme once loaded
@@ -417,7 +431,7 @@ func start():
 	if _DEBUG_: OS.set_window_title("[DEBUG] Noon – %s" % basename) # DEBUG
 	init_orb_levels(basename)
 	for orb in progression.available_orbs:
-		orbs[orb] = Helper.get(orbs, orb, 0)
+		orbs[orb] = orbs.get(orb, 0)
 
 	if _DEBUG_:
 		var shown_orb = [Orb.BLUE, Orb.GREEN, Orb.PURPLE, Orb.RED]
@@ -431,14 +445,14 @@ func start():
 	orb_panel.connect("paused", self, "_on_paused")
 	orb_panel.set_visible(true, true)
 
-	play_animation(Player.IDLE)
+	play_animation(Player.ANIMS.IDLE)
 	set_input_enabled(true)
 	reload_spots()
 
-func init_orb_levels(name):
+func init_orb_levels(name: String) -> Dictionary:
 	if get_begin() != get_start():
 		name += "/%s" % start_name
-	var ORB_LEVELS = { # The number of orbs available at the level start
+	var ORB_LEVELS := { # The number of orbs available at the level start
 		"Level2": { Orb.BLUE: 1, Orb.GREEN: 1 },
 		"Level10":{ Orb.BLUE: 1 },
 		"Level11":{ Orb.GREEN: 1 },
@@ -447,12 +461,12 @@ func init_orb_levels(name):
 		"Level32/End":{ Orb.PURPLE: 1 },
 		"Outro":  { Orb.BLUE: 1, Orb.GREEN: 1, Orb.PURPLE: 1, Orb.RED: 1 }
 	}
-	orbs = Helper.get(ORB_LEVELS, name, {})
+	return ORB_LEVELS.get(name, {})
 
 func init_ocean():
 	var path = "res://maps/dist-%s.png" % name
 	var texture
-	if ResourceLoader.has(path):
+	if ResourceLoader.exists(path):
 		texture = load(path)
 	elif _DEBUG_:
 		var map = generate_distmap(true)
@@ -484,10 +498,10 @@ func init_ocean():
 	mat.set_shader_param("far_color", far_color)
 	node.set_surface_material(0, mat)
 
-func init_path_extension(from_start=true, from_ends=true):
+func init_path_extension(from_start:=true, from_ends:=true):
 	var directions = {} # { cell:Vector3 : direction:Vector3 }
-	var cells = []
-	if from_start: cells += [get_start()]
+	var cells := PoolVector3Array()
+	if from_start: cells += PoolVector3Array([get_start()])
 	if from_ends: cells += get_ends()
 	for cell in cells:
 		for neighboor in _neighbors(cell):
@@ -511,9 +525,9 @@ func _add_extension_path(from_cell, direction, length=13):
 
 		# Add scenery and wave items on path right/left
 		var SCENERY_NAME = "Straight-2"
-		var item = theme.find_item_by_name(SCENERY_NAME); assert(item != -1)
+		var item = self.mesh_library.find_item_by_name(SCENERY_NAME); assert(item != -1)
 		var WAVE_NAME = "Wave-Straight"
-		var wave = theme.find_item_by_name(WAVE_NAME); assert(wave != -1)
+		var wave = self.mesh_library.find_item_by_name(WAVE_NAME); assert(wave != -1)
 		var shows_waves = (ambience != Ambience.NIGHTMARE and cell.y == _get_level_bottom()) # Sea level
 
 		var angle = atan2(direction.x, direction.z)
@@ -544,57 +558,56 @@ func setup_torchs():
 		set_cell_absorbed(torch, absorbed, false)
 
 func setup_camera():
-	assert(camera is GameCamera)
 	camera.set_default_environment(ambience)
 	camera.angle = get_level_angle()
 	camera.make_current()
 
-var NODE_OFFSET = AREA_OFFSET # Activable node container offset with underlying cell
-var activables = {} # { cell:Vector3 : Activable }
+var NODE_OFFSET := AREA_OFFSET # Activable node container offset with underlying cell
+var activables := {} # { cell:Vector3 : Activable }
 func setup_activables():
 	for cell in get_activables() + get_orbs():
-		var orb = get_cell_orb(cell)
+		var orb := get_cell_orb(cell)
 
 		# Add only the activable movable part to grid
-		var name
+		var name: String
 		if is_door(cell): name = "Door"
 		elif is_hole(cell): name = "Hole"
 		elif is_lift(cell): name = "Lift"
 		elif is_orb(cell): name = "Orb"
 		else: continue
 
-		var color = Orb.color(orb, season)
-		var activable = Activable.new(name, color, ambience == Ambience.NIGHTMARE)
+		var color := Orb.color(orb, season)
+		var activable := Activable.new(name, color, ambience == Ambience.NIGHTMARE)
 		add_child(activable); activables[cell] = activable
 
 		# Fix activable position/orientation
-		var rot = get_cell_quat(cell)
+		var rot := get_cell_quat(cell)
 		activable.transform *= Transform(rot)
 		activable.translation = cell + NODE_OFFSET
 
 		# Set cell with inactive mesh
-		var absorbed = not can_absorb(cell, orb)
+		var absorbed := not can_absorb(cell, orb)
 		if is_orb(cell): absorbed = is_orb_picked(cell)
 
 		var inactive = {
-			DOOR_CLOSED: DOOR,
-			HOLE: HOLE_EMPTY,
-			LIFT_UP: LIFT }
-		var item = get_cell_itemv(cell)
-		var type = _item_type(item)
+			Type_.DOOR_CLOSED: Type.DOOR,
+			Type.HOLE: Type_.HOLE_EMPTY,
+			Type_.LIFT_UP: Type.LIFT }
+		var item := get_cell_itemv(cell)
+		var type := _item_type(item)
 		if inactive.has(type):
 			item = _item_for(inactive[type], orb)
-		var orientation = get_cell_item_orientationv(cell)
+		var orientation := get_cell_item_orientationv(cell)
 		set_cell_itemv(cell, item, orientation)
 
 		# Remove lift top and orb from cell mesh
 		if is_lift(cell) or is_orb(cell):
-			var mesh = theme.get_item_mesh(item)
+			var mesh := self.mesh_library.get_item_mesh(item)
 			var surface_name = {
 				Orb.BLUE: "Blue", Orb.GREEN: "Green", Orb.PURPLE: "Purple",
 				Orb.RED: "Red", Orb.YELLOW: "Yellow", Orb.GRAY: "Gray" }[orb]
-			var surface = Helper.get_surface_named(mesh, surface_name); assert(surface != null)
-			var mat = mesh.surface_get_material(surface).duplicate()
+			var surface := Helper.get_surface_named(mesh, surface_name); assert(surface != null)
+			var mat := mesh.surface_get_material(surface).duplicate()
 			mat.flags_transparent = true
 			mat.albedo_color.a = 0
 			mesh.surface_set_material(surface, mat)
@@ -605,23 +618,23 @@ func setup_activables():
 
 var accessible_ends = []
 func _on_spots_updated(spots):
-	var ends = []
+	var ends := []
 	for spot in spots:
-		if spot != get_begin() and (get_ends().has(spot) or spot == get_start()):
+		if spot != get_begin() and (Array(get_ends()).has(spot) or spot == get_start()):
 			var end_name = end_name_for(spot); assert(end_name)
 			if not accessible_ends.has(spot):
 				emit_signal("end_accessible", end_name)
 			ends.append(spot)
 	accessible_ends = ends
 
-func _get_end_angle(end_index=0):
+func _get_end_angle(end_index:=0):
 	var end = get_ends()[end_index]
 	var ext_cell; for neighbor in _neighbors(end):
 		if get_cell_itemv(neighbor) == PATH_EXT: ext_cell = neighbor
 	assert(ext_cell)
 	return atan2(ext_cell.x-end.x, ext_cell.z-end.z) - PI/2
 
-func _on_end_accessible(end_name):
+func _on_end_accessible(end_name: String):
 	if ambience == Ambience.NIGHTMARE:
 		camera.set_ambiant_energy(0.15, 2.0)
 		# Move player to end
@@ -669,7 +682,7 @@ func _on_music_toggled(enabled):
 	music_player.muted = not enabled
 
 func _on_restarted():
-	emit_signal("restarted", false)
+	emit_signal("game_restarted")
 
 func get_player_cell():
 	return round3(player.translation - PLAYER_OFFSET)
@@ -699,15 +712,15 @@ func rotation_anim(radians):
 		assert(abs(angle) < 1e-3)
 	return anim
 
-func move_player(to):
+func move_player(to: Vector3):
 	var from = get_player_pos()
 	if to == from: return # DEBUG (`move_player` should not be called if same position)
 	var id = closest_reachable_path_for(Actor.PLAYER, from, to, null, true)
-	var path = yield(self, id)
+	var path := yield(self, id)[0] as PoolVector3Array
 	walk(player, path)
 	_on_reaching_cell(to)
 
-func walk(node, path):
+func walk(node: Spatial, path: Array):
 	set_input_enabled(false)
 
 	face_player(path[1])
@@ -719,16 +732,16 @@ func walk(node, path):
 	var tween = player.get_default_tween()
 	tween.start()
 
-	var delay = 0
-	var tweens = 0
+	var delay := 0.0
+	var tweens := 0
 	var from = node.translation
 	path.pop_front()
-	var index = 0; while true:
+	var index := 0; while true:
 		if index >= path.size(): break # Create custom loop to inc `index` into loop
 
-		var anim = Anim.RUN if should_run else Anim.WALK
-		var cell = path[index]
-		var to = get_lift_bottom(cell) + PLAYER_OFFSET
+		var anim: int = Anim.RUN if should_run else Anim.WALK
+		var cell := path[index] as Vector3
+		var to := get_lift_bottom(cell) + PLAYER_OFFSET
 		to.y += int(is_lift_up(cell))
 
 		if index == path.size()-1: # Last cell (cannot be turn or stairs)
@@ -742,7 +755,7 @@ func walk(node, path):
 		else: # Straight path or turn
 			var next = path[index+1]+PLAYER_OFFSET
 			var before = to-from; var after = next-to
-			#dassert(abs(before.x)+abs(before.z) == 1 and abs(after.x)+abs(after.z) == 1) # DEBUG
+			#assert(abs(before.x)+abs(before.z) == 1 and abs(after.x)+abs(after.z) == 1) # DEBUG
 
 			var angle = shortest(atan2(after.x,after.z)-atan2(before.x,before.z))
 			var turn_anim = rotation_anim(angle)
@@ -758,7 +771,7 @@ func walk(node, path):
 		if anim == Anim.RUN and index == path.size()-1:
 			anim = Anim.STOP
 
-		var duration = player.duration(anim)
+		var duration := player.duration(anim)
 		tween.interpolate_property(node, "translation", from, to,
 			duration, Tween.TRANS_LINEAR, Tween.EASE_IN_OUT, delay); delay += duration
 		tweens += 1
@@ -772,18 +785,18 @@ func walk(node, path):
 		yield(tween, "tween_completed")
 	var to = from - PLAYER_OFFSET
 
-	audio_player.stop(Sound.RUN if should_run else Sound.WALK)
+	audio_player.stop_sound(Sound.RUN if should_run else Sound.WALK)
 	_on_walked(node, to)
 
-func _on_walked(node, to):
+func _on_walked(node: Spatial, to: Vector3):
 	if to == get_start():
 		prints("(!) Player on start:", to)
 		_on_level_finished(to)
 	else:
-		var index = get_ends().find(to)
+		var index := Array(get_ends()).find(to)
 		if index != -1:
-			_on_level_finished(to)
 			prints("(!) Player on end:", ["End #1", "End #2"][index])
+			_on_level_finished(to)
 
 	reload_spots()
 	check_orb_nearby()
@@ -793,7 +806,7 @@ func glide(node, from, to, speed=PLAYER_SPEED*2): # speed in cells per seconds
 	var tween = Tween.new()
 	add_child(tween); tween.start()
 	var id = closest_reachable_path_for(Actor._HOLLOW, from, to, null, true)
-	var path = yield(self, id)
+	var path := yield(self, id)[0] as PoolVector3Array
 	for i in path.size()-2:
 		var current = path[i]; if is_lift(current): current.y = get_lift_bottom(current).y + 1
 		var next = path[i+1]; if is_lift(next): next.y = get_lift_bottom(next).y + 1
@@ -810,19 +823,19 @@ func glide(node, from, to, speed=PLAYER_SPEED*2): # speed in cells per seconds
 		yield(tween, "tween_completed")
 	Helper.remove_from_parent(tween)
 
-func get_end_names():
+func get_end_names() -> Array:
 	for level in END_NAMES.keys(): # Use `keys()` to keep sorted
 		if filename.get_file().find(level) != -1:
 			return END_NAMES[level]
 	return END_NAMES["*"]
 
-func end_name_for(cell):
+func end_name_for(cell: Vector3):
 	if cell == get_begin():
 		pass
 	elif cell == get_start():
 		return START_NAME
-	elif get_ends().has(cell):
-		var index = get_ends().find(cell)
+	elif Array(get_ends()).has(cell):
+		var index = Array(get_ends()).find(cell)
 		return get_end_names()[index]
 	return null
 
@@ -835,16 +848,18 @@ func _on_level_finished(cell):
 	if cell == get_begin():
 		return
 	var end_name = end_name_for(cell); assert(end_name)
-	audio_player.play(Sound.LEVEL_END)
-	audio_player.stop(Sound.OCEAN)
+	audio_player.play_sound(Sound.LEVEL_END)
+	audio_player.stop_sound(Sound.OCEAN)
 	emit_signal("finished", end_name)
 
-var ray_origin
-var ray_target
+var event_pos: Vector2
+var ray_origin # Vector3?
+var ray_target # Vector3?
 func _unhandled_input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == BUTTON_LEFT:
-		ray_origin = camera.project_ray_origin(event.position)
-		ray_target = ray_origin + camera.project_ray_normal(event.position) * 1_000
+		self.event_pos = event.position
+		self.ray_origin = camera.project_ray_origin(event.position)
+		self.ray_target = ray_origin + camera.project_ray_normal(event.position) * 1_000
 
 func _physics_process(delta):
 	if ray_origin != null and ray_target != null:
@@ -860,7 +875,8 @@ func _physics_process(delta):
 			# Find the closest to click
 			var closest_spot; var min_distance = INF
 			for spot in get_spots():
-				var distance = spot.distance_to(ray_origin)
+				var screen_pos := camera.unproject_position(spot)
+				var distance = self.event_pos.distance_squared_to(screen_pos)
 				if distance < min_distance:
 					closest_spot = spot
 					min_distance = distance
@@ -868,7 +884,7 @@ func _physics_process(delta):
 			assert(closest_spot != null)
 			var path = path_for(Actor.PLAYER, get_player_cell(), closest_spot)
 			for cell in path:
-				if get_spots().has(cell):
+				if Array(get_spots()).has(cell):
 					move_player(cell); break
 
 		ray_origin = null; ray_target = null
@@ -891,20 +907,20 @@ func check_orb_nearby():
 			pick_orb(cell)
 			audio_player.play(Sound.TAKE_ORB)
 
-func is_player_on_lift():
+func is_player_on_lift() -> bool:
 	return is_lift(get_player_pos())
 
 ### Get spots to move player
 
-var _spots = [] # Cached spots
-func get_spots():
+var _spots # PoolVector3Array?, Cached spots
+func get_spots() -> PoolVector3Array:
 	if _spots == null:
 		reload_spots()
-	return []+_spots
+	return _spots
 
-func _get_orb_positions(): # Returns closest orb positions to player, where it can walk on to pick them
-	var cells = []
-	for cell in get_cells_for(ORB):
+func _get_orb_positions() -> PoolVector3Array: # Returns closest orb positions to player, where it can walk on to pick them
+	var cells := PoolVector3Array()
+	for cell in get_cells_for(Type.ORB):
 		if not is_orb_picked(cell):
 			var spot; var distance = INF
 			for neighbor in _neighbors(cell):
@@ -916,23 +932,23 @@ func _get_orb_positions(): # Returns closest orb positions to player, where it c
 	return cells
 
 func _update_spots():
-	var concerns = [get_start()] + get_ends() + _get_orb_positions()
+	var concerns = [get_start()] + Array(get_ends()) + Array(_get_orb_positions())
 	concerns.erase(get_begin())
-	var spots = []
+	var spots := []
 	for cell in concerns:
-		var id = closest_reachable_path_for(Actor.PLAYER, get_player_pos(), cell, null, true)
-		var path = yield(self, id)
+		var id := closest_reachable_path_for(Actor.PLAYER, get_player_pos(), cell, null, true)
+		var path := Array(yield(self, id)[0] as PoolVector3Array)
 		for cell in path:
 			if is_lift(cell): spots.append(get_lift_bottom(cell))
 		spots.append(path.back())
 	Helper.distinct(spots)
 	spots.erase(get_player_pos())
 
-	for spot in spots: dassert(is_valid(spot) and is_walkable(spot)) # DEBUG
+	for spot in spots: assert(is_valid(spot) and is_walkable(spot)) # DEBUG
 
-	emit_signal("_spots_updated", spots)
+	emit_signal("_spots_updated", PoolVector3Array(spots))
 
-var _reloading = false
+var _reloading := false
 func reload_spots():
 	if _reloading: return
 	call_deferred("_reload_spots"); _reloading = true
@@ -959,7 +975,7 @@ func _reload_spots():
 	update_camera()
 
 var hotspots = []
-func enable_hotspot(cell, enabled):
+func enable_hotspot(cell: Vector3, enabled:=true):
 	.enable_hotspot(cell, enabled)
 	hotspots.append(cell) if enabled else hotspots.erase(cell)
 	var position = cell + Vector3(0,1,0)
@@ -970,29 +986,27 @@ func disable_all_hotspots():
 		enable_hotspot(spot, false)
 	assert(hotspots.empty() and spot_nodes.empty())
 
-func is_matching(cell, orb):
-	return (get_cell_orb(cell) == orb)
-
-var _activables = []
-func get_activables():
-	if _activables.empty():
+var _activables := PoolVector3Array()
+func get_activables() -> PoolVector3Array:
+	if _activables.size() == 0:
 		_activables = get_doors() + get_holes() + get_lifts() + get_torches()
 	return _activables
 
-func get_absorbables(orb):
-	var cells = []; for cell in get_activables():
+func get_absorbables(orb: int) -> PoolVector3Array:
+	var cells := PoolVector3Array()
+	for cell in get_activables():
 		if can_absorb(cell, orb):
 			cells.append(cell)
 	return cells
 
-func available_orbs():
-	var orbs = []
+func available_orbs() -> PoolIntArray:
+	var orbs := PoolIntArray()
 	for orb in self.orbs:
 		if get_orb_level(orb) > 0: orbs.append(orb)
 	return orbs
 
-func get_interactive_cells():
-	var interactives = get_orbs()
+func get_interactive_cells() -> PoolVector3Array:
+	var interactives := get_orbs()
 	for cell in get_activables():
 		for orb in available_orbs():
 			if can_absorb(cell, orb) or can_activate(cell, orb):
@@ -1001,50 +1015,55 @@ func get_interactive_cells():
 
 func update_camera():
 	call_deferred("_update_camera")
-func _update_camera(): # TODO: Pass future player pos to update position when player walking
+func _update_camera(): # TODO: Pass player path positions for smooth translation
 	if not is_inside_tree(): return
 
-	var wplayer = 2.2; var wspot = 1.4; var wactivable = 1.0; var wpath = 0.8 # Weights for center calculation
+	# Weights for center calculation
+	var wplayer := 2.2; var wspot := 1.4
+	var wactivable := 1.0; var wpath := 0.8
 
-	var player_pos = get_player_pos()
-	var spots = get_spots()+[get_start()]+get_ends()
-	Helper.distinct(spots)
-	var activables = get_interactive_cells()
+	var player_pos := get_player_pos()
+	var spots := get_spots() + PoolVector3Array([get_start()]) + get_ends()
+	spots = PoolVector3Array(Helper.distinct(Array(spots)))
+	var activables := get_interactive_cells()
 
-	var center = player_pos * wplayer
+	var center := player_pos * wplayer
 	for spot in spots: center += spot * wspot
 	for position in activables: center += position * wactivable
-	var cells = []; for end in get_ends():
+	var cells := PoolVector3Array(); for end in get_ends():
 		cells += path_for(Actor._HOLLOW, get_start(), end)
-	Helper.distinct(cells); for cell in cells: center += cell * wpath
+	cells = PoolVector3Array(Helper.distinct(Array(cells)))
+	for cell in cells: center += cell * wpath
 
 	center /= (wplayer + wspot * spots.size() + wactivable * activables.size() + wpath * cells.size())
 	camera.set_position(center)
 
-	var cam = camera.duplicate(true); add_child(cam)
+	var cam := camera.duplicate() as Camera; add_child(cam)
 	cam.translation = center
+	cam.name = "TempCamera"
 	camera.make_current() # Keep main camera current
 
-	cam.size = 4; var dock_width = 60
-	var screen = Rect2(Vector2(0,0), get_viewport().size).grow_individual(0,0,-dock_width,0)
-	var targets = [player_pos]+spots+activables+cells; assert(not targets.empty())
+	cam.size = 4; var panel_width = 60#px
+	var screen := Rect2(Vector2(0,0), get_viewport().size).grow_individual(0, 0, -panel_width, 0)
+	var targets := PoolVector3Array([player_pos]) + spots + activables + cells; assert(targets.size() > 0)
 	# Zoom-out until all `targets` visible
 	while true:
 		assert(cam.size < 60) # Avoid infinite loop
 
-		var pos = cam.unproject_position(targets[0])
-		var frame = Rect2(pos, Vector2(1,1))
+		var pos := cam.unproject_position(targets[0])
+		var frame := Rect2(pos, Vector2(1,1))
 		for position in targets:
 			frame = frame.expand(cam.unproject_position(position))
 
 		if screen.encloses(frame.grow(60)): break
 		cam.size += 1.5
 
-	camera.set_scale(max(8, cam.size))
-	Helper.remove_from_parent(cam)
+	camera.update_size(max(8, cam.size))
+	Helper.remove_from_parent(cam, false)
 
 # Returns the behaviour when `orb` collides with `cell`.
-func behaviour(cell, orb): # enum Behaviour behaviour(Vector3, Orb)
+# func behaviour(cell: Vector3, orb: Orb) -> enum Behaviour
+func behaviour(cell: Vector3, orb: int) -> int:
 	assert(is_valid(cell))
 	if can_activate(cell, orb):
 		return Behaviour.ABSORBED
@@ -1058,44 +1077,46 @@ func behaviour(cell, orb): # enum Behaviour behaviour(Vector3, Orb)
 
 ## Orb particles
 
-var PARTICLE_OFFSET = AREA_OFFSET + Vector3(0,1.3,0)
-var PARTICLE_SPEED = 7.0 if _DEBUG_ else 4.0 # cells per second
+var PARTICLE_OFFSET := AREA_OFFSET + Vector3(0, 1.48, 0)
+var PARTICLE_SPEED := 7.0 if _DEBUG_ else 4.0 # cells per second
 
 class ParticlesNode extends Spatial:
 
+	const ActivableParticles := preload("res://particles/ActivableParticles.gd")
+
 	signal moved(from, to)
 
-	var orb setget ,get_orb
+	var orb := -1 setget ,get_orb
 	func get_orb():
 		return particles.orb if particles else -1
 
-	var particles setget set_particles # ActivableParticles
-	func set_particles(value):
+	var particles: ActivableParticles setget set_particles
+	func set_particles(value: ActivableParticles):
 		if particles:
 			remove_child(particles)
 		particles = value
 		add_child(particles)
 
-var moving_particles = 0
-var node_paths = {} # {Particle : [Vector3]}
+var moving_particles := 0
+var node_paths := {} # { Particle : PoolVector3Array }
 ## Move particles with matching `orb`, starting at `from` and going to `to` if reachable.
 ## The optional `end_callback` is called when particles moved, and be like `void a_selector(Orb, Behaviour)`,
 ##   the `behaviour` param is `PASSING` if particles has reached `to`.
 ## Returns true if the particle can start moving (unlike bouncing lift).
-func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb, Vector3, Vector3, String?)
-	var id = closest_reachable_path_for(Actor.PARTICLE, from, to, orb, true)
-	var path = yield(self, id)
+func move_particles(orb: int, from: Vector3, to: Vector3, end_callback:="") -> bool:
+	var id := closest_reachable_path_for(Actor.PARTICLE, from, to, orb, true)
+	var path := yield(self, id)[0] as PoolVector3Array
 
-	var particles = preload("res://particles/ActivableParticles.tscn").instance()
+	var particles := preload("res://particles/ActivableParticles.tscn").instance()
 	particles.name = "particles"
 	particles.season = season; particles.orb = orb
 	particles.translation = PARTICLE_OFFSET
 
-	var node = ParticlesNode.new()
+	var node := ParticlesNode.new()
 	node.particles = particles
 	node.translation = from
 	add_child(node)
-	var tween = Tween.new(); tween.name = "tween"
+	var tween := Tween.new(); tween.name = "tween"
 	node.add_child(tween)
 
 	if is_lift(from): # Absorbing up lift...
@@ -1122,42 +1143,39 @@ func move_particles(orb, from, to, end_callback=null): # bool move_particles(Orb
 
 	if _DEBUG_:
 		# Check that two particles don't have the same end and distance (until absorbed)
-		var dests = {}; for path in node_paths.values(): # DEBUG
-			var longest_path = []; for index in range(1, path.size()): # Ignore absorbed cell
+		var dests := {}; for path in node_paths.values(): # DEBUG
+			var longest_path := []; for index in range(1, path.size()): # Ignore absorbed cell
 				longest_path.append(path[index])
 				if can_activate(path[index], orb): break
 			var dest = longest_path.back()
-			if dests.has(dest): dassert(dests[dest] != path.size())
+			if dests.has(dest): assert(dests[dest] != path.size())
 			dests[dest] = longest_path.size()
 
-	advance_particle(node, end_callback)
+	_advance_particle(node, end_callback)
 	moving_particles += 1
 
 	audio_player.play(Sound.PARTICLES)
 
 	return true
 
-func get_particle_next_cell(node, cell, step=1): # Vector3? get_particle_next_cell(ParticlesNode, Vector3, int?)
-	assert(node is ParticlesNode)
-	var path = node_paths[node]; assert(path); var index = path.find(cell)
+func get_particle_next_cell(node: ParticlesNode, cell: Vector3, step:=1) -> Vector3:
+	assert(node_paths.has(node))
+	var path = Array(node_paths[node]); var index = path.find(cell)
 	return path[index+step] if index != -1 and index+step < path.size() else null
 
-func particle_behaviour(node, orb, cell): # enum Behaviour particle_behaviour(ParticlesNode, Orb, Vector3)
-	assert(node is ParticlesNode)
-	var reversed = reversed_particles.has(node)
-	var next = get_particle_next_cell(node, cell, -1 if reversed else 1)
+# func particle_behaviour(node: ParticlesNode, orb: Orb, cell: Vector3) -> enum Behaviour
+func particle_behaviour(node: ParticlesNode, orb: int, cell: Vector3) -> int:
+	var reversed := reversed_particles.has(node)
+	var next := get_particle_next_cell(node, cell, -1 if reversed else 1)
 	if next == null: # End of path reached
 		if can_activate(cell, orb) or cell == get_player_cell():
 			return Behaviour.REACHED
 		else: # It reaches the computed path, no absorbing can occur
 			return Behaviour.BOUNCING
 
-	var path = node_paths[node]
+	var path = Array(node_paths[node])
 	if path.find(cell) == 0 and reversed: # Bounced back to start
 		return Behaviour.ABSORBED # Bouncing back to start
-
-	if is_lift(cell) and not is_lift_up(cell) and not is_matching(cell, orb) and cell.y < next.y:
-		assert(false) # ???: can it be triggered?
 
 	# Particle passing on down/up lift with same top level
 	if is_lift(next) and not can_activate(get_lift_bottom(next), orb) and (
@@ -1167,15 +1185,14 @@ func particle_behaviour(node, orb, cell): # enum Behaviour particle_behaviour(Pa
 	assert(is_valid(next))
 	return behaviour(next, orb)
 
-# Note: `node` emits "moved" when finished
-func _move_particle(node, to):
-	assert(node is ParticlesNode)
-	var from = node.translation
-	var tween = node.get_node("tween"); tween.start()
+# Note: `node` emits "moved" when move animation to `to` finished
+func _move_particle(node: ParticlesNode, to: Vector3):
+	var from := node.translation
+	var tween := node.get_node("tween"); tween.start()
 	tween.interpolate_property(node, "translation", from, to,
 		1.0 / PARTICLE_SPEED, Tween.TRANS_LINEAR, Tween.EASE_IN)
 
-	var from_ofs = PARTICLE_OFFSET; var to_ofs = PARTICLE_OFFSET
+	var from_ofs := PARTICLE_OFFSET; var to_ofs = PARTICLE_OFFSET
 	if is_torch(from) and not can_activate(from, node.orb):
 		from_ofs.y += 0.6
 	elif is_torch(to) and not can_activate(to, node.orb):
@@ -1188,23 +1205,23 @@ func _move_particle(node, to):
 	yield(tween, "tween_completed")
 	node.emit_signal("moved", from, to)
 
-var reversed_particles = [] # [Particle]
-func advance_particle(node, end_callback=""):
-	assert(node is ParticlesNode)
-	var cell = round3(node.translation)
-	var behaviour = particle_behaviour(node, node.orb, cell)
+var reversed_particles := [] # [Particle]
+# Move `node` particle following `get_particle_next_cell`,
+#   and calls optional `end_callback(Orb, enum Behaviour)` when final destination reached.
+func _advance_particle(node: ParticlesNode, end_callback:=""):
+	var cell := round3(node.translation); assert(cell != null)
+	var behaviour := particle_behaviour(node, node.orb, cell)
 	match behaviour:
 		Behaviour.ABSORBED, Behaviour.REACHED:
-			var destination
-
+			var destination # Vector3?
 			var reversed = reversed_particles.has(node)
 			if behaviour == Behaviour.ABSORBED and reversed:
 				# Ends by bouncing back to start (re-absorbed by emitter)
 				behaviour = Behaviour.BOUNCING
-				destination = node_paths[node].front()
+				destination = node_paths[node][0]
 
 			if destination == null:
-				var step = -1 if reversed else 1
+				var step := -1 if reversed else 1
 				destination = get_particle_next_cell(node, cell, step)
 
 			if destination == null:
@@ -1213,7 +1230,11 @@ func advance_particle(node, end_callback=""):
 			assert(destination != null)
 
 			# Move particle to `destination`
-			_move_particle(node, destination)
+			var offset := -Vector3(0,0.8,0)
+			#prints(destination, get_player_cell())
+			if destination == get_player_cell():
+				offset = Vector3(0,0.25,0)
+			_move_particle(node, destination + offset)
 			yield(node, "moved")
 
 			# Cleanup particle node
@@ -1226,7 +1247,7 @@ func advance_particle(node, end_callback=""):
 			return
 
 		Behaviour.BOUNCING:
-			var reversed = reversed_particles.has(node)
+			var reversed := reversed_particles.has(node)
 			if reversed:
 				reversed_particles.erase(node)
 			else:
@@ -1238,34 +1259,34 @@ func advance_particle(node, end_callback=""):
 			pass
 
 	var reversed = reversed_particles.has(node)
-	var to = get_particle_next_cell(node, cell, -1 if reversed else 1)
+	var to := get_particle_next_cell(node, cell, -1 if reversed else 1)
 	_move_particle(node, to)
 	yield(node, "moved")
 
 	if behaviour == Behaviour.BOUNCING:
 		_on_particle_bounced(node, node.orb, to)
 
-	advance_particle(node, end_callback)
+	_advance_particle(node, end_callback)
 
-func _on_lift_bounced(position, orb):
+func _on_lift_bounced(position: Vector3, orb: int):
 	var activable = activables[position]
 	activable.play("Lift-bounce")
 	yield(activable.get_animation_player(), "animation_finished")
 
-	var up = is_lift_up(position)
+	var up := is_lift_up(position)
 	set_lift_up(position, true)
 
-var particle_already_bouncing = false
-func _on_particle_bounced(node, orb, position):
+var particle_already_bouncing := false
+func _on_particle_bounced(node: ParticlesNode, orb: int, position: Vector3):
 	if is_lift_up(position): assert(false) # Ignore for bouncing lifts # TODO: Remove if unused
 	if ambience == Ambience.NIGHTMARE: return
 
-	var panel = preload("res://BounceWavePanel.tscn").instance()
+	var panel := preload("res://BounceWavePanel.tscn").instance()
 	# Place below orbs panel to avoid (transparent) orbs buttons to disappear
 	add_child(panel); move_child(panel, orb_panel.get_index())
 	if snow: move_child(panel, snow.get_index())
 
-	var center = camera.unproject_position(position + Vector3(0,1,0))
+	var center := camera.unproject_position(position + Vector3(0,1,0))
 	panel.play_wave(center)
 	panel.queue_remove()
 
@@ -1277,8 +1298,8 @@ func _on_particle_bounced(node, orb, position):
 		emit_signal("player_hurt")
 		camera.shake(1.1, 1.4)
 
-func _on_particle_moved(node, orb, to_pos, behaviour): # Bounced back to start if behaviour == BOUNCING
-	assert(node is ParticlesNode)
+# Note: The particle `node` as bounced back to start if behaviour == BOUNCING
+func _on_particle_moved(node: ParticlesNode, orb: int, to_pos: Vector3, behaviour: int):
 	moving_particles -= 1;
 	if moving_particles == 0: all_particles_moved()
 
@@ -1291,12 +1312,12 @@ func _on_particle_moved(node, orb, to_pos, behaviour): # Bounced back to start i
 	else:
 		activate(to_pos)
 
-	audio_player.stop(Sound.PARTICLES)
+	audio_player.stop_sound(Sound.PARTICLES)
 	#node.particles.restart() # DEBUG
 	#node.particles.emitting = false
 	node.particles.hide()
 
-	var timer = Timer.new(); add_child(timer)
+	var timer := Timer.new(); add_child(timer)
 	timer.wait_time = 0.5; timer.autostart = true
 	yield(timer, "timeout")
 	Helper.remove_from_parent(node)
@@ -1305,17 +1326,17 @@ func all_particles_moved():
 	particle_already_bouncing = false
 
 
-var orbs = {} # { Orb : Int }
-func get_orb_level(orb):
-	return Helper.get(orbs, orb, 0)
+var orbs := {} # { Orb : Int }
+func get_orb_level(orb: int) -> int:
+	return orbs.get(orb, 0)
 
-func add_orb_level(orb, levels=1):
-	orbs[orb] = Helper.get(orbs, orb, 0) + levels
+func add_orb_level(orb: int, levels:=1):
+	orbs[orb] = orbs.get(orb, 0) + levels
 	#print("Orb #%s added (= %d)" % [orb, orbs[orb]]) # DEBUG
 	orb_panel.orb_levels = orbs
 	orb_panel.set_visible(true, true)
 
-func pick_orb(cell):
+func pick_orb(cell: Vector3):
 	print("Picking orb")
 	# Rotate orb node to player
 	var node = activables[cell].get_animated_node(); assert(node)
@@ -1329,13 +1350,13 @@ func pick_orb(cell):
 
 	reload_spots()
 
-var absorbing_particles = 0
-func start_absorbing(orb):
+var absorbing_particles := 0
+func start_absorbing(orb: int):
 	#print("=== Start Absorbing ===")
 
-	var player_pos = get_player_pos()
+	var player_pos := get_player_pos()
 	if is_lift_up(player_pos):
-		var lift = get_lift_bottom(player_pos)
+		var lift := get_lift_bottom(player_pos)
 		if can_absorb(lift, orb): # Player on matching lift, only absorb the lift
 			absorb(lift)
 			add_orb_level(orb)
@@ -1343,8 +1364,8 @@ func start_absorbing(orb):
 			return
 
 	absorbing_particles = 0
-	var absorbables = get_absorbables(orb)
-	if not absorbables.empty():
+	var absorbables := get_absorbables(orb)
+	if absorbables.size() > 0:
 
 		queue_animation(Anim.ABSORB)
 		yield(self, ANIM_DONE_SIGNAL)
@@ -1358,7 +1379,7 @@ func start_absorbing(orb):
 	else:
 		queue_animation(Anim.ABSORB_NONE)
 
-func absorbing_ended(orb, behaviour):
+func absorbing_ended(orb: int, behaviour: int):
 	if behaviour == Behaviour.PASSING: # Reaching player
 		add_orb_level(orb)
 		# TODO: If player is on a down lift, wait for ascending lift animation to update spots
@@ -1374,9 +1395,8 @@ func all_absorbed():
 
 ### Player releasing an orb
 
-func start_releasing(orb):
+func start_releasing(orb: int):
 	assert(get_orb_level(orb) > 0)
-	#print("=== Start Releasing ===")
 
 	var nearest; var min_distance = INF
 	if is_player_on_lift() and can_activate(get_player_pos(), orb):
@@ -1386,7 +1406,8 @@ func start_releasing(orb):
 		for cell in get_activables():
 			if can_activate(cell, orb):
 				var id = closest_reachable_path_for(Actor.PARTICLE, get_player_pos(), cell, orb, true)
-				var path = yield(self, id); assert(path.size() >= 2)
+				var path = yield(self, id)[0] as PoolVector3Array; assert(path.size() >= 2)
+				assert(path is PoolVector3Array)
 				var path_to_closest = path_for(Actor._HOLLOW, path[path.size()-2], cell)
 				var complete_path = path + path_to_closest
 				var distance = complete_path.size()
@@ -1415,7 +1436,7 @@ func start_releasing(orb):
 		audio_player.play(Sound.RELEASE_ORB)
 
 		add_orb_level(orb, -1)
-		if is_player_on_lift() and min_distance == 1: # Player activates the lift he's on
+		if is_player_on_lift() and min_distance == 1: # Player activates the lift is standing on
 			assert(nearest == get_player_pos())
 			assert(can_activate(nearest, orb))
 
@@ -1427,17 +1448,14 @@ func start_releasing(orb):
 	else:
 		queue_animation(Anim.RELEASE_NONE)
 
-func release_orb_ended(orb, behaviour):
-	#print("=== Orb Released ===")
+func release_orb_ended(orb: int, behaviour: int):
 	set_input_enabled(true)
 
-## TODO: Rewrite in C++
-
-func absorb(cell):
-	if not can_absorb(cell, null): return
+func absorb(cell: Vector3):
+	#if not can_absorb(cell, -1): return
 
 	#prints("Absorb:", cell)
-	var player_on_lift = (is_lift_up(cell) and cell == get_lift_bottom(get_player_pos()))
+	var player_on_lift := (is_lift_up(cell) and cell == get_lift_bottom(get_player_pos()))
 	set_cell_activated(cell, false)
 	if player_on_lift:
 		player.blend_enabled = false
@@ -1448,11 +1466,11 @@ func absorb(cell):
 		player.blend_enabled = true
 		_on_walked(player, cell)
 
-func activate(cell):
-	if not can_activate(cell, null): return
+func activate(cell: Vector3):
+	#if not can_activate(cell, -1): return
 
 	#prints("Activate:", cell)
-	var on_lift = is_player_on_lift()
+	var on_lift := is_player_on_lift()
 	set_cell_activated(cell, true)
 	if is_lift(cell) and on_lift:
 		player.blend_enabled = false
@@ -1467,14 +1485,14 @@ func activate(cell):
 
 		_on_walked(player, cell)
 
-func update_orb_taken(cell, taken=true):
+func update_orb_taken(cell: Vector3, taken:=true):
 	set_cell_absorbed(cell, taken)
 
-func set_cell_activated(cell, activated):
+func set_cell_activated(cell: Vector3, activated: bool):
 	set_cell_absorbed(cell, not activated)
 
-func set_cell_absorbed(cell, absorbed, animated=true):
-	var orb = get_cell_orb(cell)
+func set_cell_absorbed(cell: Vector3, absorbed, animated=true):
+	var orb := get_cell_orb(cell)
 	if animated:
 		if is_orb(cell) and absorbed != is_orb_picked(cell): return
 		if not is_orb(cell) and absorbed != can_absorb(cell, orb): return
@@ -1487,12 +1505,12 @@ func set_cell_absorbed(cell, absorbed, animated=true):
 	else: return
 
 	if is_torch(cell):
-		var sound = Sound.TORCH
-		audio_player.stop(sound) if absorbed else audio_player.play(sound)
+		var sound := Sound.TORCH
+		audio_player.stop_sound(sound) if absorbed else audio_player.play_sound(sound)
 		torch_particles[cell].emitting = not absorbed
 		return
 	elif not is_orb(cell):
-		var sound = Sound.INACTIVATE if absorbed else Sound.ACTIVATE
+		var sound := Sound.INACTIVATE if absorbed else Sound.ACTIVATE
 		if animated: audio_player.play(sound)
 
 	# Play absorb animation (in reverse for activation)
@@ -1505,18 +1523,18 @@ func set_cell_absorbed(cell, absorbed, animated=true):
 	_on_cell_absorbed(cell, absorbed, animated)
 
 const NIGHTMARE_LIGHT = "nightmare-light"
-func _on_cell_absorbed(cell, absorbed, animated):
+func _on_cell_absorbed(cell: Vector3, absorbed: bool, animated: bool):
 	if ambience == Ambience.NIGHTMARE and not is_orb(cell):
 		var activable = activables[cell]
 		if not activable.has_node(NIGHTMARE_LIGHT):
-			var light = OmniLight.new(); light.name = NIGHTMARE_LIGHT
+			var light := OmniLight.new(); light.name = NIGHTMARE_LIGHT
 			light.translation.y += 2.5
 			light.light_negative = true
 			light.omni_range = 8.5
 			light.omni_attenuation = 3.4
 			activable.add_child(light)
 
-			var tween = Tween.new(); tween.name = "Tween"
+			var tween := Tween.new(); tween.name = "Tween"
 			light.add_child(tween); tween.start()
 
 		var light = activable.get_node(NIGHTMARE_LIGHT)
@@ -1528,29 +1546,29 @@ func _on_cell_absorbed(cell, absorbed, animated):
 		var particles = inactive_particles[cell]
 		particles.emitting = absorbed
 
-func _item_for(type, orb):
+func _item_for(type: int, orb: int):
 	return ITEMS[type][orb]
 
-var rotation_player = AnimationPlayer.new()
-func _queue_player_rotation(radians, duration):
+var rotation_player := AnimationPlayer.new()
+func _queue_player_rotation(radians: float, duration: float):
 	if not rotation_player.is_inside_tree():
 		rotation_player.name = "RotationPlayer"
 		add_child(rotation_player)
 
 	#prints("Queue player rotation:", radians)
-	var animation = method_animation("_rotate_player_by", [radians, duration])
+	var animation := method_animation("_rotate_player_by", [radians, duration])
 	animation.length = duration
 
-	var name = "rotation-%d" % randi()
+	var name := "rotation-%d" % randi()
 	rotation_player.add_animation(name, animation)
 	rotation_player.queue(name)
 
-func _rotate_player_by(radians, duration):
-	var tween = Tween.new(); tween.name = "_RotationTween"
+func _rotate_player_by(radians: float, duration: float):
+	var tween := Tween.new(); tween.name = "_RotationTween"
 	player.add_child(tween)
 	#assert(tween.name == "_RotationTween") # Check one tween is running
 
-	var roty = player.rotation.y
+	var roty := player.rotation.y
 	tween.interpolate_property(player, "rotation",
 		player.rotation, player.rotation + Vector3(0, radians, 0),
 		duration * 0.99, Tween.TRANS_LINEAR, Tween.EASE_IN)
@@ -1560,22 +1578,25 @@ func _rotate_player_by(radians, duration):
 	player.rotation.y = roty + radians
 	Helper.remove_from_parent(tween)
 
-func can_reverse(anim):
+func can_reverse(anim: int) -> bool:
 	return false
 
-func queue_animation(anim, reversed=false):
+func queue_animation(anim: int, reversed:=false):
 	play_animation(anim, reversed, true)
 
 # Play boy's `anim` animation.
-func play_animation(anim, reversed=false, should_queue=false):
+func play_animation(anim: int, reversed:=false, should_queue:=false):
 	assert(not reversed or can_reverse(anim))
-	player.stop_waiting()
 
-	var name = Player.name(anim)
+	cancel_call("_on_player_wait")
+	player.stop_waiting()
+	
+	var anim_player := player.get_animation_player()
+	var name := player.name(anim)
 	#print("$$$ Queue anim %s%s" % [name, " [reversed]" if reversed else ""]) # DEBUG
 	anim_player.queue(name) if should_queue else anim_player.play(name)
 
-	var angle = 0; match anim:
+	var angle := 0.0; match anim:
 		Anim.TURN_LEFT: angle += TAU/4
 		Anim.TURN_RIGHT:angle -= TAU/4
 		Anim.HALF_TURN: angle += TAU/2
@@ -1587,26 +1608,26 @@ func play_animation(anim, reversed=false, should_queue=false):
 	_on_animation_played()
 
 func _on_animation_played():
-	var anim_player = player.get_animation_player()
-	if not anim_player.is_playing():
-		var delay = 5 + randi() % 3 # 5-8s
-		call_after(delay, "_on_player_wait")
+	var delay := 5.0 + ceil(randf() * 3.0) # 5-8s
+	call_after(delay, "_on_player_wait")
 
 func _on_player_wait():
-	player.play_waiting()
+	var anim_player = player.get_animation_player()
+	if not anim_player.is_playing():
+		player.play_waiting()
 
 
-var spot_node
-var spot_nodes = {} # {Vector3 : MeshInstance}
-func add_spot_node(position):
+var spot_node: MeshInstance
+var spot_nodes := {} # {Vector3 : MeshInstance}
+func add_spot_node(position: Vector3):
 	remove_spot_node(position)
 
 	if not spot_node:
-		var mesh = QuadMesh.new()
+		var mesh := QuadMesh.new()
 		mesh.size = Vector2(0.5, 0.5)
 
-		var mat = SpatialMaterial.new()
-		mat.flags_unshaded = true
+		var mat := SpatialMaterial.new()
+		#mat.flags_unshaded = true
 		mat.flags_transparent = true
 		mat.albedo_color = Season.scenery_color(season)
 		mat.albedo_texture = preload("res://textures/hotspot.png")
@@ -1616,27 +1637,29 @@ func add_spot_node(position):
 		spot_node.mesh = mesh
 		spot_node.rotation.x = -PI/2
 
-		var tween = Tween.new(); tween.name = "Tween"
+		var tween := Tween.new(); tween.name = "Tween"
 		spot_node.add_child(tween); tween.start()
 
-	if is_lift_up(position): dassert(position.y-1 == get_lift_bottom(position).y) # DEBUG
+	if is_lift_up(position): assert(position.y-1 == get_lift_bottom(position).y) # DEBUG
 
-	var node = spot_node.duplicate()
+	var node := spot_node.duplicate() as Spatial
 	add_child(node); spot_nodes[position] = node
 	node.translation = position + Vector3(0.5, 5e-3, 0.5)
 	node.translation.y += int(is_lift_up(position))
 
 	node.scale = Vector3()
-	var tween = node.get_node("Tween"); tween.start()
+	var tween := node.get_node("Tween") as Tween
+	tween.start()
 	tween.interpolate_property(node, "scale",
 		Vector3(), Vector3(1,1,1), 1.0, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
 
-func remove_spot_node(position):
+func remove_spot_node(position: Vector3):
 	if spot_nodes.has(position):
 		var node = spot_nodes[position]
 		spot_nodes.erase(position)
 
-		var tween = node.get_node("Tween")
+		var tween := node.get_node("Tween") as Tween
+		tween.start()
 		tween.interpolate_property(node, "scale",
 			Vector3(1,1,1), Vector3(), 0.5, Tween.TRANS_LINEAR, Tween.EASE_IN)
 		yield(tween, "tween_completed")
@@ -1645,45 +1668,45 @@ func remove_spot_node(position):
 
 ## Utilities
 
-func round3(v):
+func round3(v: Vector3) -> Vector3:
 	return Vector3(round(v.x), round(v.y), round(v.z))
 
-func shortest(radians):
+func shortest(radians: float) -> float:
 	return wrapf(radians, -PI, PI)
 
-func method_animation(method, args=[]):
-	var animation = Animation.new()
+func method_animation(method: String, args:=[]) -> Animation:
+	var animation := Animation.new()
 	animation.length = 1e-8 # Set minimum duration to ensure method call
-	var track = animation.add_track(Animation.TYPE_METHOD)
-	var info = { "method": method, "args": args }
+	var track := animation.add_track(Animation.TYPE_METHOD)
+	var info := { "method": method, "args": args }
 	animation.track_insert_key(track, 0, info)
 	return animation
 
-var delay_timers = {} # { method:string : Timer }
-func call_after(delay, method, args=[]):
-	var timer
-	if delay_timers.has(method):
-		timer = delay_timers[method]
-		timer.disconnect("timeout", self, "_on_call_delayed")
-	else:
-		timer = Timer.new(); add_child(timer)
-
+var delay_timers := {} # { method:string : Timer }
+func call_after(delay: float, method: String, args:=[]):
+	cancel_call(method)
+	assert(not delay_timers.has(method))
+	var timer := Timer.new(); add_child(timer)
 	timer.connect("timeout", self, "_on_call_delayed", [method, args])
 	timer.wait_time = max(0.1, delay)
 	delay_timers[method] = timer
 	timer.start()
 
-func _on_call_delayed(method, args):
+func _on_call_delayed(method: String, args:=[]):
+	cancel_call(method)
 	callv(method, args)
 
-	var timer = delay_timers[method]
-	Helper.remove_from_parent(timer)
-	delay_timers.erase(method)
+func cancel_call(method: String):
+	if delay_timers.has(method):
+		var timer = delay_timers[method]
+		timer.stop()
+		Helper.remove_from_parent(timer)
+		delay_timers.erase(method)
 
 ## DEPRECATED
 
-func get_player_pos():
+func get_player_pos() -> Vector3:
 	return get_player_cell()
 
-func get_accessible_spots():
+func get_accessible_spots() -> PoolVector3Array:
 	return get_spots()

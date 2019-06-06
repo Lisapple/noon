@@ -1,7 +1,7 @@
 ### Main game scene. It manages level and inter-levels presentations.
 extends Node
 
-var _DEBUG_ = Helper.DEBUG_ENABLED
+var _DEBUG_ := Helper.DEBUG_ENABLED
 
 ### Imports
 
@@ -12,27 +12,22 @@ const GameCamera = preload("res://GameCamera.gd")
 const SoundPlayer = preload("res://SoundPlayer.gd")
 
 ### Constants
-
-var USE_TEST = _DEBUG_ and false
-
+var USE_TEST := _DEBUG_ and false
 const INTRO_LEVEL_NAME = "Intro"
 
-### Lazy variables
-
-onready var player = $AnimationPlayer
-
 ### Variables
+onready var player := $AnimationPlayer as AnimationPlayer
 
-var mapper = LevelsMap.new()
+var mapper := LevelsMap.new()
 
-var current_scene # Node?
+var current_scene: Node
 var current_start_name # String?
-var end_scene # Node?
-var camera = GameCamera.new()
-var audio_player = SoundPlayer.new()
+var end_scene: Node
+var camera := GameCamera.new()
+var audio_player := SoundPlayer.new()
 
 func _ready():
-	
+
 	if _DEBUG_:
 		preload("res://QuoteManager.gd").get_all_quotes()
 		assert(not preload("res://QuoteManager.gd").get_quotes(["Level34", "Level33"]).empty())
@@ -40,6 +35,7 @@ func _ready():
 		progression.current_level = null
 		progression.save()
 
+	camera.name = "MainCamera"
 	add_child(camera)
 	add_child(audio_player)
 
@@ -100,7 +96,7 @@ func restart_game():
 	progression.delete(true)
 	start_game()
 
-var severity = Severity.NONE
+var severity: int = Severity.NONE
 func _on_player_hurt():
 	severity += 1
 	if severity > Severity.HIGH:
@@ -108,7 +104,7 @@ func _on_player_hurt():
 
 	set_critical(severity)
 	if severity == Severity.LOW:
-		var timer = Timer.new(); add_child(timer)
+		var timer := Timer.new(); add_child(timer)
 		timer.wait_time = 2; timer.autostart = true
 		yield(timer, "timeout")
 		var should_disable = (severity != Severity.HIGH)
@@ -120,7 +116,7 @@ var last_nightmare_level
 func _on_level_failed(scene):
 	set_critical(Severity.NONE)
 
-	var name = _get_basename(scene)
+	var name := _get_basename(scene)
 	last_failed_level = name
 
 	var nightmare
@@ -151,13 +147,13 @@ func enable_critical_effect(enabled):
 	#$LifeIndicator.visible = true; $LifeIndicator.raise()
 	if enabled:
 		player.play("Desaturate"); player.queue("heartbeat-critical")
-		audio_player.play(Sound.HEART_BEAT)
+		audio_player.play_sound(Sound.HEART_BEAT)
 	else:
 		player.stop(); player.play("Resaturate")
-		audio_player.stop(Sound.HEART_BEAT)
+		audio_player.stop_sound(Sound.HEART_BEAT)
 
-func present_previous_level_from(start_name):
-	var name = _get_basename(current_scene)
+func present_previous_level_from(start_name: String):
+	var name := _get_basename(current_scene)
 	var info = mapper.level_before(name, start_name)
 	if info == null:
 		print("No more level to load!")
@@ -165,8 +161,8 @@ func present_previous_level_from(start_name):
 	var prev_name = info.keys()[0]; start_name = info.values()[0]
 	present_level(prev_name, start_name)
 
-func present_next_level_from(end_name):
-	var name = _get_basename(current_scene)
+func present_next_level_from(end_name: String):
+	var name := _get_basename(current_scene)
 	if name.find("Nightmare") != -1:
 		name = last_failed_level; assert(name)
 
@@ -179,22 +175,23 @@ func present_next_level_from(end_name):
 
 func show_end(message=null):
 	_remove_current_scene()
-	var end = preload("res://End.tscn").instance()
+	var end := preload("res://End.tscn").instance()
 	if message: end.message = message
 	end.connect("restart_pressed", self, "restart_game")
 	add_child(end)
 
 ### Presenting level
 
-var loader # ResourceInteractiveLoader?
-func present_level(name, start_name=null):
+var loader: ResourceInteractiveLoader
+func present_level(name: String, start_name=null):
 	var current_name = _get_basename(current_scene) if current_scene else null
-	var shows_tutorial = ([current_name, name] == ["Intro", "Level1"])
-	var shows_quotes = (current_scene != null)# and not USE_TEST
+	var shows_tutorial := ([current_name, name] == ["Intro", "Level1"])
+	var shows_quotes = (current_scene != null and name != "Intro")# and not USE_TEST
 
-	var path = "res://levels/%s.tscn" % name
-	assert(File.new().file_exists(path))
+	var path := "res://levels/%s.tscn" % name
+	assert(ResourceLoader.exists(path)) # Notice: No level for `name`
 	loader = ResourceLoader.load_interactive(path)
+	assert(loader)
 	poll_delta = 0; poll_error = OK
 
 	current_start_name = start_name
@@ -205,7 +202,7 @@ func present_level(name, start_name=null):
 	if shows_tutorial:
 		show_tutorial(4)
 	elif shows_quotes:
-		var panel = QuotePanel.new()
+		var panel := QuotePanel.new()
 		if name.begins_with("Nightmare"): # Presenting nightmare
 			var orbs = current_scene.get_all_orbs()
 			panel.quotes = QuoteManager.get_failure_quotes(name, orbs)
@@ -220,9 +217,9 @@ func present_level(name, start_name=null):
 		assert(poll_error == ERR_FILE_EOF)
 		present_ready_scene()
 
-var poll_error = OK
-var poll_delta = 0
-func _process(delta):
+var poll_error := OK
+var poll_delta := 0.0
+func _physics_process(delta: float):
 	poll_delta += delta
 	if loader and poll_delta >= 0.4:
 		poll_delta = 0;
@@ -241,6 +238,7 @@ func present_ready_scene():
 
 func _remove_current_scene():
 	if current_scene:
+		camera.get_parent().remove_child(camera)
 		Helper.remove_from_parent(current_scene)
 		current_scene = null
 
@@ -283,15 +281,15 @@ func _present_scene(scene, start_name=null):
 
 	player.play_backwards("Panel-Fade")
 
-func _get_basename(scene):
+func _get_basename(scene) -> String:
 	return scene.filename.get_file().get_basename()
 
-func _on_end_reached(end, scene):
+func _on_end_reached(end: String, scene):
 	progression.current_level = _get_basename(current_scene) # Do not save if level failed
 	set_raining(false)
 	set_critical(Severity.NONE)
 
-func _on_level_finished(end, scene):
+func _on_level_finished(end: String, scene):
 	assert(end != current_start_name)
 	if end == "Start":
 		present_previous_level_from(end)

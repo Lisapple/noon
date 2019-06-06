@@ -1,6 +1,6 @@
 extends "res://TestGameGridMap.gd"
 
-var start_end # Vector3
+var start_end: Vector3
 
 func _test_level_integrity():
 	pass
@@ -16,7 +16,8 @@ func start():
 func _orb_picked():
 	return progression.available_orbs.has(Orb.RED)
 
-func get_start():
+func get_start() -> Vector3:
 	return get_orbs()[0] if _orb_picked() else start_end
-func get_ends():
-	return [start_end] if _orb_picked() else []
+func get_ends() -> PoolVector3Array:
+	var ends := [start_end] if _orb_picked() else []
+	return PoolVector3Array(ends)

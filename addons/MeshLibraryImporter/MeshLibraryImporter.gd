@@ -8,19 +8,17 @@ func _enter_tree():
 	import_plugin.connect("resource_saved", self, "_on_resource_saved")
 	add_import_plugin(import_plugin)
 
-func _on_resource_saved(library, path):
-	assert(library is MeshLibrary)
-
-	var size = 64#px
+func _on_resource_saved(library: MeshLibrary, path: String):
+	var size := 64#px
 	for item in library.get_item_list():
-		var mesh = library.get_item_mesh(item)
+		var mesh := library.get_item_mesh(item)
 		var preview = get_editor_interface().make_mesh_previews([mesh], size)[0]
 		library.set_item_preview(item, preview)
 
-	assert(ResourceSaver.save(path, library) == OK)
+	var err := ResourceSaver.save(path, library); assert(err == OK)
 
 	# Success alert
-	var alert = AcceptDialog.new()
+	var alert := AcceptDialog.new()
 	alert.window_title = "Library successfully exported!"
 	alert.dialog_text = "Saved as %s" % path
 	alert.popup_exclusive = true

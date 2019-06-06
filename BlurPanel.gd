@@ -1,10 +1,10 @@
 tool
 extends Panel
 
-var z_index = 20
-var fullscreen = true
+var z_index := 20
+var fullscreen := true
 
-func set_blur(value):
+func set_blur(value: float):
 	if material:
 		material.set_shader_param("blur", value)
 
@@ -34,8 +34,8 @@ func _ready():
 			COLOR.a = 1.0;
 		}"""
 
-func add_child(node):
-	.add_child(node)
+func add_child(node: Node, legible_unique_name=false):
+	.add_child(node, legible_unique_name)
 	if node is Control:
 		VisualServer.canvas_item_set_parent(node.get_canvas_item(), get_canvas_item())
 		VisualServer.canvas_item_set_z_as_relative_to_parent(node.get_canvas_item(), true)

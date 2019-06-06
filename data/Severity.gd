@@ -1,3 +1,4 @@
 extends Node
+class_name Severity
 
-enum Severity { NONE, LOW, HIGH }
+enum { NONE, LOW, HIGH }

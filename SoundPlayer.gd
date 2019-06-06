@@ -42,29 +42,29 @@ func _init():
 	AudioServer.set_bus_effect_enabled(bus, 0, false)
 
 func _get_players():
-	var players = []
+	var players := []
 	for child in get_children():
 		if child is _AudioPlayer: players.append(child)
 	return players
 
-func _player_for(sound):
+func _player_for(sound: int):
 	for player in _get_players():
 		if player.sound == sound and player.playing: return player
 
-func _get_ready_player():
+func _get_ready_player() -> _AudioPlayer:
 	var player = _AudioPlayer.new(); add_child(player)
 	player.bus = BUS_NAME
 	return player
 
-func play(sound):
+func play_sound(sound: int):
 	assert(is_inside_tree())
 	prints("$$$ Playing:", Sound.name(sound))
 
-	var player = _get_ready_player()
+	var player := _get_ready_player()
 	player.sound = sound
 	player.play()
 
-func stop(sound):
+func stop_sound(sound: int):
 	if _player_for(sound):
 		_player_for(sound).stop()
 	#cleanup_players() # TODO: Cleanup players sometime

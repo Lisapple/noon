@@ -28,27 +28,27 @@ const BUS_NAME = "background-music-player"
 const NIGHTMARE_PLAYS_MUSIC = true # If music should not be muted on nightmare mode
 
 var current_season # enum Season?
-var current_theme # String, from THEMES
-var current_bridge # String, from BRIGES
-var current_sample
-var timer = Timer.new()
+var current_theme: String # String, from THEMES
+var current_bridge: String # String, from BRIGES
+#var current_sample
+var timer := Timer.new()
 
-var ocean_player = OceanPlayer.new()
+var ocean_player := OceanPlayer.new()
 
 func _init():
 	set_bus_name(BUS_NAME)
 	set_settings_name("music_player")
 
-	var bus = AudioServer.get_bus_index(BUS_NAME)
+	var bus := AudioServer.get_bus_index(BUS_NAME)
 	AudioServer.set_bus_volume_db(bus, -3.6)
 	AudioServer.set_bus_mute(bus, is_muted())
 
-	var filter = AudioEffectLowPassFilter.new()
+	var filter := AudioEffectLowPassFilter.new()
 	filter.cutoff_hz = 960#Hz
 	AudioServer.add_bus_effect(bus, filter)
 	AudioServer.set_bus_effect_enabled(bus, 0, false)
 
-	var reverb = AudioEffectReverb.new()
+	var reverb := AudioEffectReverb.new()
 	AudioServer.add_bus_effect(bus, reverb)
 	AudioServer.set_bus_effect_enabled(bus, 1, false)
 
@@ -58,7 +58,7 @@ func _ready():
 	set_season(Season.SUMMER)
 	connect("player_muted", self, "_on_muted")
 
-func set_season(season, nightmare=false):
+func set_season(season: int, nightmare=false):
 	assert(not THEMES[season].empty())
 	assert(not BRIDGES[season].empty())
 	if current_season != season:
@@ -74,28 +74,28 @@ func set_season(season, nightmare=false):
 
 		play_loop_for(season)
 
-func _rand_theme(season):
-	var themes = THEMES[season]
-	var index = themes.find(current_theme); assert(index != -1)
+func _rand_theme(season: int) -> String:
+	var themes := THEMES[season] as Array
+	var index := themes.find(current_theme); assert(index != -1)
 	index = (index + randi() % themes.size()) % themes.size()
 	return themes[index]
 
-func _rand_bridge(season):
-	var bridges = BRIDGES[season]
-	var index = bridges.find(current_bridge); assert(index != -1)
+func _rand_bridge(season: int) -> String:
+	var bridges := BRIDGES[season] as Array
+	var index := bridges.find(current_bridge); assert(index != -1)
 	index = (index + randi() % bridges.size()) % bridges.size()
 	return bridges[index]
 
-func play_loop_for(season):
+func play_loop_for(season: int):
 	assert(is_inside_tree())
 	stop()
-	var sample = current_theme
+	var sample := current_theme
 	if stream:
 		var name = stream.resource_path.get_file().get_basename()
 		var playing_theme = THEMES[season].has(name)
 		sample = (_rand_bridge(season) if playing_theme else _rand_theme(season))
 
-	var folder = Season.name(season).to_lower()
+	var folder := Season.name(season).to_lower() as String
 	stream = load("res://music/%s/%s.wav" % [folder, sample])
 
 	if is_connected("finished", self, "play_loop_for"):
@@ -103,5 +103,5 @@ func play_loop_for(season):
 	connect("finished", self, "play_loop_for", [season])
 	play()
 
-func _on_muted(muted):
+func _on_muted(muted: bool):
 	ocean_player.playing = muted # Play ocean sounds if no music

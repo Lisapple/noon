@@ -3,7 +3,6 @@
 [ext_resource path="res://textures/bounce-wave.png" type="Texture" id=1]
 
 [sub_resource type="Shader" id=1]
-
 code = "shader_type canvas_item;
 
 uniform sampler2D mask;
@@ -21,13 +20,9 @@ void fragment() {
 }"
 
 [resource]
-
-render_priority = 0
 shader = SubResource( 1 )
 shader_param/center = Vector2( 0.5, 0.5 )
 shader_param/radius = 0.5
-shader_param/thickness = null
+shader_param/thickness = 0.08
 shader_param/alpha = 1.0
 shader_param/mask = ExtResource( 1 )
-_sections_unfolded = [ "shader_param" ]
-

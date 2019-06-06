@@ -1,7 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=2]
 
 [sub_resource type="Shader" id=1]
-
 code = "shader_type spatial;
 //render_mode unshaded;
 
@@ -16,13 +15,8 @@ void fragment() {
 	dist = smoothstep(0.5, 0.8, dist);
 	ALBEDO = mix(shore_color, far_color, dist).rgb;
 }"
-_sections_unfolded = [ "Resource" ]
 
 [resource]
-
-render_priority = 0
 shader = SubResource( 1 )
 shader_param/shore_color = Color( 0.199219, 0.737244, 1, 1 )
 shader_param/far_color = Color( 0, 0.47113, 0.726562, 1 )
-_sections_unfolded = [ "Resource", "shader_param" ]
-

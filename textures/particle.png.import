@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/moon.png-c928c526eae12d6d8dd220a84dee36fb.s3tc.stex"
-path.etc2="res://.import/moon.png-c928c526eae12d6d8dd220a84dee36fb.etc2.stex"
+path.s3tc="res://.import/particle.png-6bc2982443cc9a0ea7820fc4c0d2daf7.s3tc.stex"
+path.etc2="res://.import/particle.png-6bc2982443cc9a0ea7820fc4c0d2daf7.etc2.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc2" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://textures/moon.png"
-dest_files=[ "res://.import/moon.png-c928c526eae12d6d8dd220a84dee36fb.s3tc.stex", "res://.import/moon.png-c928c526eae12d6d8dd220a84dee36fb.etc2.stex" ]
+source_file="res://textures/particle.png"
+dest_files=[ "res://.import/particle.png-6bc2982443cc9a0ea7820fc4c0d2daf7.s3tc.stex", "res://.import/particle.png-6bc2982443cc9a0ea7820fc4c0d2daf7.etc2.stex" ]
 
 [params]
 
@@ -25,7 +25,7 @@ flags/repeat=true
 flags/filter=true
 flags/mipmaps=true
 flags/anisotropic=false
-flags/srgb=0
+flags/srgb=1
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/HDR_as_SRGB=false

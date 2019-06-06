@@ -29,10 +29,10 @@ func set_nightmare_level(level):
 	last_nightmare_level = level
 	save()
 
-var available_orbs = [] setget set_available_orbs, get_available_orbs # [enum Orb]
+var available_orbs := [] setget set_available_orbs, get_available_orbs # [enum Orb]
 func get_available_orbs():
 	return available_orbs
-func set_available_orbs(orbs):
+func set_available_orbs(orbs: Array):
 	assert(typeof(orbs) == TYPE_ARRAY)
 	available_orbs = orbs
 	save()
@@ -41,7 +41,7 @@ func _init():
 	load_from_disk()
 
 func load_from_disk():
-	var file = File.new()
+	var file := File.new()
 	if file.file_exists(SAVE_PATH):
 		file.open_encrypted_with_pass(SAVE_PATH, File.READ, SAVE_PASSCODE)
 		if file.get_8() != SAVE_VERSION:
@@ -64,7 +64,7 @@ func add_available_orb(orb):
 
 func save():
 	if current_level != null and available_orbs != null:
-		var file = File.new()
+		var file := File.new()
 		file.open_encrypted_with_pass(SAVE_PATH, File.WRITE, SAVE_PASSCODE)
 		file.store_8(SAVE_VERSION)
 		file.store_var(current_level if current_level else "")
@@ -76,7 +76,7 @@ func save():
 
 func delete(confirm=false):
 	if confirm:
-		var file = File.new()
+		var file := File.new()
 		file.open_encrypted_with_pass(SAVE_PATH, File.WRITE, SAVE_PASSCODE)
 		file.store_var(null)
 		file.close()

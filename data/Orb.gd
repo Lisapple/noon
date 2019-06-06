@@ -6,17 +6,16 @@ const ALL = [ BLUE, GREEN, PURPLE, RED, YELLOW, GRAY ]
 
 const PREFIXES = { "B":BLUE, "G":GREEN, "P":PURPLE, "R":RED, "Y":YELLOW, "N":GRAY }
 
-static func with(prefix):
+static func with(prefix: String) -> int:
 	return PREFIXES[prefix]
 
-static func prefix(orb):
+static func prefix(orb: int) -> String:
 	var index = PREFIXES.values().find(orb)
 	return PREFIXES.keys()[index]
 
-static func color(orb, season=Season.SUMMER): # Color color(Orb, Season?)
+static func color(orb: int, season:=Season.SUMMER) -> Color:
 	if orb == Orb.GRAY:
 		return Color(0.7,0.7,0.7,1)
-	#return Color({ BLUE:"22f", GREEN:"2f2", PURPLE:"d2d", RED:"d22", YELLOW:"dd2" }[orb]) # DEBUG
 	return Color({
 		Season.SUMMER: {BLUE:"0F81B6", GREEN:"06DC74", PURPLE:"A15DB2", RED:"E13C49", YELLOW:"FFD352"},
 		Season.AUTUMN: {BLUE:"2986B1", GREEN:"27D380", PURPLE:"A16BAF", RED:"D8525D", YELLOW:"F3D067"},
@@ -24,7 +23,7 @@ static func color(orb, season=Season.SUMMER): # Color color(Orb, Season?)
 		Season.SPRING: {BLUE:"618DA1", GREEN:"67BB92", PURPLE:"9B80A1", RED:"BF7E84", YELLOW:"D1C08D"}
 	}[season][orb])
 
-static func particle_color(orb, season=Season.SUMMER):
-		var c = color(orb, season)
-		c.s *= 1.2; c.v *= 1.3
-		return c
+static func particle_color(orb: int, season:=Season.SUMMER) -> Color:
+	var c = color(orb, season)
+	c.s *= 1.2; c.v *= 1.3
+	return c

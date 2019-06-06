@@ -48,11 +48,10 @@ expand_margin_top = 0.0
 expand_margin_bottom = 0.0
 shadow_color = Color( 0, 0, 0, 0.6 )
 shadow_size = 0
-shadow_offset = Vector2( 0, 0 )
 anti_aliasing = true
 anti_aliasing_size = 1
 
-[sub_resource type="Animation" id=5]
+[sub_resource type="Animation" id=4]
 
 resource_name = "start-raining"
 length = 1.0
@@ -71,9 +70,8 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
 }
 
-[sub_resource type="Animation" id=4]
+[sub_resource type="Animation" id=5]
 
-resource_name = "strike"
 length = 2.0
 loop = false
 step = 0.05
@@ -90,7 +88,7 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0.5 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0.5 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0.2 ), Color( 1, 1, 1, 0 ) ]
 }
 
-[node name="Panel" type="Panel" index="0"]
+[node name="Panel" type="Panel"]
 
 material = SubResource( 2 )
 anchor_left = 0.0
@@ -129,8 +127,8 @@ autoplay = ""
 playback_process_mode = 1
 playback_default_blend_time = 0.0
 playback_speed = 1.0
-anims/start-raining = SubResource( 5 )
-anims/strike = SubResource( 4 )
+anims/start-raining = SubResource( 4 )
+anims/strike = SubResource( 5 )
 blend_times = [  ]
 
 

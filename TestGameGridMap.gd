@@ -18,11 +18,11 @@ const TIMEOUT = 6.0
 # Note: Test will move player to end if the last step is *not a MOVE* instruction.
 enum { MOVE, ABSORB, RELEASE, WAIT }
 
-var tests_enabled = false setget enable_tests
-func enable_tests(value=true):
+var tests_enabled := false setget enable_tests
+func enable_tests(value:=true):
 	tests_enabled = value
 
-var timer = Timer.new()
+var timer := Timer.new()
 func _ready():
 	add_child(timer)
 	if tests_enabled:
@@ -32,7 +32,7 @@ func _ready():
 		run()
 
 func run():
-	var tests = {
+	var tests := {
 		"Intro": [
 			{"type": WAIT, "secs": 2.0},
 			{"type": MOVE, "to": Vector3(1,0,0)},
@@ -214,7 +214,7 @@ func run():
 		],
 		"Level30/End": [
 			{"type": ABSORB, "orb": Orb.RED},
-			{"type": MOVE, "to": get_ends().back()}
+			{"type": MOVE, "to": Array(get_ends()).back()}
 		],
 		"Level40": [
 			{"type": ABSORB, "orb": Orb.BLUE},
@@ -390,24 +390,24 @@ func run():
 			{"type": ABSORB, "orb": Orb.BLUE} # Level over
 		]
 
-	var level = filename.get_file().get_basename()
-	if Helper.get(tests, level, []).empty():
+	var level := filename.get_file().get_basename()
+	if tests.get(level, []).empty():
 		return # DEBUG
 
 	if get_begin() != get_start():
 		var name = "%s/End" % level
 		run_tests(tests[name])
 	else:
-		var steps = Helper.get(tests, level, [])
+		var steps = tests.get(level, [])
 		if steps.back()["type"] != MOVE:
 			steps += [{"type": MOVE, "to": get_ends()[0] }]
 		run_tests(steps)
 
-func run_tests(tests):
-	var index = 0
+func run_tests(tests: Array):
+	var index := 0
 	while index < tests.size():
 		var info = tests[index]
-		var type = info["type"]
+		var type := info["type"] as int
 		print("=> Starting test #%d: %s with %s" % [index+1, ["MOVE","ABSORB","RELEASE","WAIT"][type], info])
 		match type:
 			MOVE:
@@ -433,7 +433,7 @@ func run_tests(tests):
 
 # Timeout management (assert on timeout)
 # `wait_for_timeout()` / `cancel_timeout()`
-var timeout_timer = Timer.new()
+var timeout_timer := Timer.new()
 func wait_for_timeout(timeout=TIMEOUT):
 	if not timeout_timer.is_inside_tree():
 		timeout_timer.connect("timeout", self, "_on_timeout")
@@ -445,50 +445,55 @@ func _on_timeout():
 func cancel_timeout():
 	timeout_timer.stop()
 
-func add_timer(secs):
-	var timer = Timer.new()
+func add_timer(secs) -> Timer:
+	var timer := Timer.new()
 	add_child(timer)
 	timer.wait_time = secs
 	timer.start()
 	return timer
 
-func wait_for(secs):
+func wait_for(secs: float):
 	assert(secs < TIMEOUT)
-	var timer = add_timer(secs)
+	var timer := add_timer(secs)
 	yield(timer, "timeout")
 	emit_signal("test_executed")
 	timer.queue_free(); remove_child(timer)
 
-func move_player(to):
-	if not tests_enabled: .move_player(to)
-	
+func move_player(to: Vector3):
+	if not tests_enabled:
+		.move_player(to)
+		return
+
 	for _i in 5:
-		var timer = add_timer(1.0)
+		var timer := add_timer(1.0)
 		yield(timer, "timeout")
 		timer.queue_free(); remove_child(timer)
 
 		call_deferred("reload_spots")
-		if get_accessible_spots().has(to): break
+		if Array(get_accessible_spots()).has(to): break
 
 	prints("Spots:", get_accessible_spots())
-	assert(get_accessible_spots().has(to))
+	assert(Array(get_accessible_spots()).has(to)) # Notice: Test failed!
 	prints("Move to:", to)
 
 	.move_player(to)
 
-func _on_walked(node, to):
+func _on_walked(node: Spatial, to: Vector3):
 	._on_walked(node, to)
 	emit_signal("test_executed")
 
-func _on_level_finished(cell):
+func _on_end_accessible(end_name: String):
+	pass # Ignore (test already move player to end)
+
+func _on_level_finished(cell: Vector3):
 	._on_level_finished(cell)
 	print("=> Level finished!")
 
 #func start_absorbing(orb):
 #	.start_absorbing(orb)
 
-func absorbing_ended(orb, behaviour):
-	.absorbing_ended(orb, behaviour)
+#func absorbing_ended(orb, behaviour):
+#	.absorbing_ended(orb, behaviour)
 
 func all_absorbed():
 	.all_absorbed()
@@ -497,6 +502,6 @@ func all_absorbed():
 #func start_releasing(orb):
 #	.start_releasing(orb)
 
-func release_orb_ended(orb, behaviour):
+func release_orb_ended(orb: int, behaviour: int):
 	.release_orb_ended(orb, behaviour)
 	emit_signal("test_executed")

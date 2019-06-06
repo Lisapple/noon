@@ -53,8 +53,9 @@ func _init(type, color, nightmare=false):
 	# Adjust node material color
 	var mat = SpatialMaterial.new()
 	mat.albedo_color = color.darkened(0.1)
-	mat.emission_enabled = nightmare
-	mat.emission = color; mat.emission_energy = 0.5
+	mat.emission_enabled = true
+	mat.emission_energy = 0.5 if nightmare else 0.12
+	mat.emission = color
 
 	var surface = Helper.get_surface_named(animated_node.mesh, "Default-Color")
 	if surface != -1:
