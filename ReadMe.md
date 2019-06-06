@@ -1,7 +1,7 @@
 noon
 ====
 
-This is the repository of the puzzle-game [noon](https://lisacintosh.itch.io/noon); with the version 1.0 released on July 2018.
+This is the repository of the puzzle-game [noon](https://lisacintosh.itch.io/noon); with the version 1.0 released on July 2018, and version 1.1 on June 2019.
 
 Like the game and want to support? [PayPal](https://paypal.me/max174)
 
@@ -41,7 +41,7 @@ Press orbs on right panel to release one of them, and long-press to absorb all t
 Downloads
 ---------
 
-Version 1.1 is available on [Linux](), [macOS]() and [Windows]().
+Version 1.1 is [available on Linux, macOS and Windows](https://lisacintosh.itch.io/noon).
 
 _These binaries are not signed. Use them at your own risks._
 
