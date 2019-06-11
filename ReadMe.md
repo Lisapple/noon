@@ -3,7 +3,7 @@ noon
 
 This is the repository of the puzzle-game [noon](https://lisacintosh.itch.io/noon); with the version 1.0 released on July 2018, and version 1.1 on June 2019.
 
-Like the game and want to support? [PayPal](https://paypal.me/max174)
+Like the game and want to support? [PayPal](https://paypal.me/lisapple)
 
 
 
