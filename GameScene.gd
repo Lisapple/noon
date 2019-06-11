@@ -45,6 +45,8 @@ func _ready():
 	start_game()
 
 func start_game():
+	AudioServer.set_bus_mute(0, false) # Unmute Master
+	
 	var level = progression.current_level if progression.current_level else INTRO_LEVEL_NAME
 	present_level(level, progression.start_name)
 	print("Restoring progression: level %s, orbs %s" % [level, progression.available_orbs])
